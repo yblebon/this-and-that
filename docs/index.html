@@ -31,12 +31,13 @@
             overflow: hidden;
         }
 
+        /* ── Progress bar ── */
         .progress-container {
             position: sticky;
             top: 0;
             width: 100%;
-            height: 5px;
-            background: rgba(0,0,0,0.05);
+            height: 6px;
+            background: rgba(0,0,0,0.06);
             z-index: 1000;
         }
         #read-progress {
@@ -45,13 +46,26 @@
             background: var(--accent-red);
             transition: width 0.1s ease-out;
         }
+        /* Improvement 3: chapter tick marks */
+        .chapter-tick {
+            position: absolute;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: var(--border-color);
+            opacity: 0.35;
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
 
+        /* ── Layout ── */
         .app-container {
             display: flex;
             height: 100vh;
             width: 100vw;
         }
 
+        /* ── Sidebar ── */
         .sidebar {
             width: var(--sidebar-width);
             min-width: var(--sidebar-width);
@@ -65,7 +79,6 @@
             z-index: 900;
             transition: transform 0.3s ease;
         }
-
         .sidebar-header {
             display: flex;
             align-items: center;
@@ -76,7 +89,6 @@
             gap: 16px;
             min-height: 40px;
         }
-
         .sidebar-header h2 {
             margin: 0;
             font-size: 1.1rem;
@@ -88,13 +100,9 @@
             max-width: calc(100% - 60px);
             line-height: 1.2;
         }
+        #close-sidebar { flex: 0 0 auto; cursor: pointer; padding: 4px; }
 
-        #close-sidebar {
-            flex: 0 0 auto;
-            cursor: pointer;
-            padding: 4px;
-        }
-
+        /* Improvement 1: richer story items */
         .story-item {
             padding: 10px 14px;
             border: 3px solid var(--border-color);
@@ -109,20 +117,26 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-wrap: wrap;
         }
-
-        .story-item:hover {
-            transform: translate(2px, -2px);
-            box-shadow: 5px 5px 0 var(--border-color);
+        .story-item:hover { transform: translate(2px,-2px); box-shadow: 5px 5px 0 var(--border-color); }
+        .story-item.active { background: var(--accent-red); color: white; transform: translate(2px,2px); box-shadow: 0 0 0; }
+        .story-item-title { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .story-meta { font-size: 0.68rem; font-weight: 400; text-transform: none; opacity: 0.6; white-space: nowrap; }
+        .story-item.active .story-meta { opacity: 0.75; }
+        .story-new-badge {
+            font-size: 0.6rem;
+            font-weight: 900;
+            padding: 1px 5px;
+            border: 2px solid var(--border-color);
+            border-radius: 3px;
+            background: var(--comic-yellow);
+            color: var(--border-color);
+            flex-shrink: 0;
         }
+        .story-item.active .story-new-badge { background: white; color: var(--accent-red); border-color: white; }
 
-        .story-item.active {
-            background: var(--accent-red);
-            color: white;
-            transform: translate(2px, 2px);
-            box-shadow: 0 0 0;
-        }
-
+        /* ── Content panel ── */
         .content-panel {
             flex-grow: 1;
             overflow-y: auto;
@@ -135,12 +149,13 @@
             scroll-behavior: smooth;
         }
 
+        /* ── Character legend ── */
         .character-legend {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 6px;
-            margin: 12px 0 16px;
+            margin: 12px 0 8px;
             padding: 8px;
             width: 100%;
             max-width: 700px;
@@ -149,7 +164,6 @@
             background: white;
             box-shadow: 4px 4px 0 var(--border-color);
         }
-
         .legend-pill {
             display: flex;
             align-items: center;
@@ -157,40 +171,68 @@
             font-size: 0.68rem;
             font-weight: 900;
             background: #f8f8f8;
-            padding: 6px 12px;
+            padding: 5px 10px;
             border: 2px solid var(--border-color);
             border-radius: 999px;
             text-transform: uppercase;
             cursor: pointer;
             transition: all 0.15s;
         }
-
-        .legend-pill:hover {
-            transform: translateY(-1px);
-        }
-
-        .legend-pill.filtering {
-            background: var(--accent-red);
-            color: white;
-            transform: translateY(1px);
-        }
-
-        .legend-pill i[data-lucide] {
-            width: 16px;
-            height: 16px;
+        .legend-pill:hover { transform: translateY(-1px); }
+        .legend-pill.filtering { color: white; transform: translateY(1px); }
+        /* Improvement 2: avatar initials in legend */
+        .legend-avatar {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.55rem;
+            font-weight: 900;
             flex-shrink: 0;
-            stroke-width: 2.2;
+            border: 1.5px solid rgba(0,0,0,0.2);
         }
 
-        .timeline {
+        /* Improvement 3: chapter jump nav */
+        .chapter-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 0 0 14px;
             width: 100%;
             max-width: 700px;
-            display: none;
         }
+        .chapter-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border: 2.5px solid var(--border-color);
+            border-radius: 4px;
+            background: white;
+            font-family: var(--comic-font);
+            font-size: 0.68rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 2px 2px 0 var(--border-color);
+            transition: all 0.12s;
+        }
+        .chapter-btn:hover { transform: translate(1px,-1px); box-shadow: 3px 3px 0 var(--border-color); }
+        .chapter-btn.current { background: var(--accent-red); color: white; transform: translate(1px,1px); box-shadow: 0 0 0; }
+        .chapter-btn-num {
+            background: var(--border-color);
+            color: white;
+            font-size: 0.58rem;
+            padding: 0 4px;
+            border-radius: 2px;
+        }
+        .chapter-btn.current .chapter-btn-num { background: white; color: var(--accent-red); }
 
-        .timeline.active {
-            display: block;
-        }
+        /* ── Messages ── */
+        .timeline { width: 100%; max-width: 700px; display: none; }
+        .timeline.active { display: block; }
 
         .message {
             display: flex;
@@ -201,14 +243,8 @@
             max-width: 700px;
             transition: opacity 0.4s;
         }
-
-        .timeline.is-filtering .message {
-            opacity: 0.18;
-        }
-
-        .timeline.is-filtering .message.highlight {
-            opacity: 1;
-        }
+        .timeline.is-filtering .message { opacity: 0.18; }
+        .timeline.is-filtering .message.highlight { opacity: 1; }
 
         .dialog-date {
             font-size: 0.68rem;
@@ -222,15 +258,8 @@
             background: white;
             padding: 0 10px;
         }
-
-        .message-body {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            width: 100%;
-        }
-
-        .message.left .message-body  { flex-direction: row; }
+        .message-body { display: flex; align-items: flex-start; gap: 10px; width: 100%; }
+        .message.left  .message-body { flex-direction: row; }
         .message.right .message-body { flex-direction: row-reverse; }
 
         .dialog-number {
@@ -244,27 +273,21 @@
             border-radius: 3px;
             z-index: 2;
         }
-
         .message.left  .dialog-number { left: 48px; }
         .message.right .dialog-number { right: 48px; }
 
+        /* Improvement 2: avatar with initials + character colour */
         .avatar {
             width: 48px;
             height: 48px;
             border: 3px solid var(--border-color);
             border-radius: 50%;
             flex-shrink: 0;
-            background: #eee;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #666;
-        }
-
-        .avatar i[data-lucide] {
-            width: 28px;
-            height: 28px;
-            stroke-width: 1.8;
+            font-weight: 900;
+            font-size: 0.9rem;
         }
 
         .message-content {
@@ -279,6 +302,9 @@
             line-height: 1.35;
             margin-bottom: 12px;
         }
+        /* Improvement 2: coloured side border */
+        .message.left  .message-content { border-left-width: 6px; }
+        .message.right .message-content { border-right-width: 6px; }
 
         .message-content::after {
             content: '';
@@ -288,24 +314,10 @@
             height: 0;
             border: 10px solid transparent;
         }
+        .message.left  .message-content::after { left: -22px; border-right-color: var(--border-color); }
+        .message.right .message-content::after { right: -22px; border-left-color: var(--border-color); }
 
-        .message.left .message-content::after {
-            left: -20px;
-            border-right-color: var(--border-color);
-        }
-
-        .message.right .message-content::after {
-            right: -20px;
-            border-left-color: var(--border-color);
-        }
-
-        .username {
-            font-weight: 900;
-            font-size: 0.82rem;
-            color: var(--accent-red);
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
+        .username { font-weight: 900; font-size: 0.82rem; text-transform: uppercase; margin-bottom: 4px; }
 
         .share-btn {
             position: absolute;
@@ -324,28 +336,16 @@
             align-items: center;
             gap: 5px;
             box-shadow: 4px 4px 0 var(--border-color);
-            clip-path: polygon(0% 15%, 15% 15%, 15% 0%, 85% 0%, 85% 15%, 100% 15%, 100% 85%, 85% 85%, 85% 100%, 15% 100%, 15% 85%, 0% 85%);
+            clip-path: polygon(0% 15%,15% 15%,15% 0%,85% 0%,85% 15%,100% 15%,100% 85%,85% 85%,85% 100%,15% 100%,15% 85%,0% 85%);
             transition: all 0.1s ease-in-out;
             z-index: 10;
         }
+        .share-btn:hover  { background: #fff; transform: translate(-2px,-2px); box-shadow: 6px 6px 0 var(--border-color); }
+        .share-btn:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--border-color); }
+        .message.right .share-btn { right: auto; left: 15px; }
 
-        .share-btn:hover {
-            background: #fff;
-            transform: translate(-2px, -2px);
-            box-shadow: 6px 6px 0 var(--border-color);
-        }
-
-        .share-btn:active {
-            transform: translate(2px, 2px);
-            box-shadow: 0px 0px 0 var(--border-color);
-        }
-
-        .message.right .share-btn {
-            right: auto;
-            left: 15px;
-        }
-
-        #menu-toggle, #install-btn {
+        /* ── Fixed buttons ── */
+        #menu-toggle, #install-btn, #kb-help-btn {
             position: fixed;
             top: 8px;
             padding: 8px 12px;
@@ -362,23 +362,127 @@
             box-shadow: 3px 3px 0 var(--border-color);
             transition: all 0.2s;
             font-size: 0.92rem;
+            font-family: var(--comic-font);
         }
-
-        #menu-toggle { left: 8px; }
+        #menu-toggle  { left: 8px; }
         #install-btn  { right: 8px; display: none; }
-
-        #menu-toggle:hover, #install-btn:hover {
+        #kb-help-btn  { right: 8px; background: var(--border-color); }
+        #menu-toggle:hover, #install-btn:hover, #kb-help-btn:hover {
             transform: translateY(-2px);
             box-shadow: 5px 5px 0 var(--border-color);
         }
 
-        #empty-state {
-            text-align: center;
-            margin-top: 18vh;
-            padding: 0 16px;
-            color: #444;
+        /* Improvement 6: keyboard shortcut overlay */
+        #kb-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        #kb-overlay.visible { display: flex; }
+        .kb-modal {
+            background: white;
+            border: 4px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px 24px;
+            box-shadow: 7px 7px 0 var(--border-color);
+            max-width: 360px;
+            width: 90%;
+        }
+        .kb-modal h3 {
+            font-size: 1rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin: 0 0 14px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--border-color);
+        }
+        .kb-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 7px 0;
+            font-size: 0.82rem;
+            border-bottom: 1px solid rgba(0,0,0,0.07);
+        }
+        kbd {
+            display: inline-block;
+            padding: 2px 7px;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            font-family: var(--comic-font);
+            font-size: 0.78rem;
+            font-weight: 900;
+            background: #f5f5f5;
+            box-shadow: 2px 2px 0 var(--border-color);
+        }
+        .kb-desc { color: #555; }
+        .kb-close {
+            margin-top: 14px;
+            width: 100%;
+            padding: 8px;
+            border: 3px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--comic-yellow);
+            font-family: var(--comic-font);
+            font-size: 0.82rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 3px 3px 0 var(--border-color);
         }
 
+        /* Improvement 4: share disclosure modal */
+        #share-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        #share-modal.visible { display: flex; }
+        .share-modal-box {
+            background: white;
+            border: 4px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px 24px;
+            box-shadow: 7px 7px 0 var(--border-color);
+            max-width: 340px;
+            width: 90%;
+        }
+        .share-modal-box h3 { font-size: 1rem; font-weight: 900; text-transform: uppercase; margin: 0 0 10px; }
+        .share-modal-box p  { font-size: 0.82rem; line-height: 1.5; color: #444; margin: 0 0 16px; }
+        .share-modal-btns   { display: flex; gap: 8px; }
+        .share-modal-btns button {
+            flex: 1;
+            padding: 8px;
+            border: 3px solid var(--border-color);
+            border-radius: 6px;
+            font-family: var(--comic-font);
+            font-size: 0.8rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 3px 3px 0 var(--border-color);
+        }
+        #share-confirm { background: var(--comic-yellow); }
+        #share-cancel  { background: #f0f0f0; }
+
+        /* ── Empty state ── */
+        #empty-state { text-align: center; margin-top: 18vh; padding: 0 16px; color: #444; }
+
+        /* Improvement 6: keyboard-focused message */
+        .message.kb-focused .message-content {
+            outline: 3px solid var(--accent-red);
+            outline-offset: 2px;
+        }
+
+        /* ── Responsive ── */
         @media (max-width: 900px) {
             .sidebar {
                 position: fixed;
@@ -389,97 +493,102 @@
                 padding: 12px 16px;
                 background: var(--bg-color);
             }
-
-            .sidebar.open {
-                transform: translateX(0);
-            }
-
-            .sidebar-header h2 {
-                font-size: 1rem;
-                max-width: calc(100% - 70px);
-            }
-
-            .sidebar-header {
-                gap: 12px;
-                padding: 0 0 10px 0;
-            }
-
-            .content-panel {
-                padding: 0 8px 50px;
-            }
-
-            .message {
-                margin: 0 auto 24px;
-            }
-
-            .message-content {
-                max-width: 88%;
-                padding: 11px 14px;
-            }
-
-            .avatar {
-                width: 44px;
-                height: 44px;
-            }
-
-            .avatar i[data-lucide] {
-                width: 26px;
-                height: 26px;
-            }
-
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-header h2 { font-size: 1rem; max-width: calc(100% - 70px); }
+            .sidebar-header { gap: 12px; padding: 0 0 10px 0; }
+            .content-panel { padding: 0 8px 50px; }
+            .message { margin: 0 auto 24px; }
+            .message-content { max-width: 88%; padding: 11px 14px; }
+            .avatar { width: 44px; height: 44px; }
             .message.left  .dialog-number { left: 50px; }
             .message.right .dialog-number { right: 50px; }
-
-            .dialog-date {
-                font-size: 0.66rem;
-                padding: 0 10px;
-                margin-bottom: 5px;
-            }
-
-            .legend-pill {
-                padding: 5px 11px;
-                font-size: 0.66rem;
-            }
-
-            #menu-toggle, #install-btn {
-                top: 6px;
-                padding: 7px 11px;
-            }
+            .dialog-date   { font-size: 0.66rem; padding: 0 10px; margin-bottom: 5px; }
+            .legend-pill   { padding: 5px 11px; font-size: 0.66rem; }
+            #menu-toggle, #install-btn, #kb-help-btn { top: 6px; padding: 7px 11px; }
+            #kb-help-btn { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <button id="menu-toggle">
+    <button id="menu-toggle" aria-label="Open stories">
         <i data-lucide="menu" width="24" height="24"></i>
         Stories
     </button>
 
-    <button id="install-btn">
+    <button id="install-btn" aria-label="Install app">
         <i data-lucide="download" width="20" height="20"></i>
         Install
     </button>
+
+    <button id="kb-help-btn" aria-label="Keyboard shortcuts">
+        <i data-lucide="keyboard" width="18" height="18"></i>
+        ?
+    </button>
+
+    <!-- Improvement 6: keyboard shortcuts overlay -->
+    <div id="kb-overlay" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts">
+        <div class="kb-modal">
+            <h3>Keyboard shortcuts</h3>
+            <div class="kb-row">
+                <span><kbd>J</kbd> / <kbd>K</kbd></span>
+                <span class="kb-desc">Next / previous message</span>
+            </div>
+            <div class="kb-row">
+                <span><kbd>&larr;</kbd> / <kbd>&rarr;</kbd></span>
+                <span class="kb-desc">Previous / next story</span>
+            </div>
+            <div class="kb-row">
+                <span><kbd>F</kbd></span>
+                <span class="kb-desc">Filter by focused character</span>
+            </div>
+            <div class="kb-row">
+                <span><kbd>Esc</kbd></span>
+                <span class="kb-desc">Clear filter / close sidebar</span>
+            </div>
+            <div class="kb-row">
+                <span><kbd>?</kbd></span>
+                <span class="kb-desc">Show / hide this panel</span>
+            </div>
+            <button class="kb-close" id="kb-close-btn">Close</button>
+        </div>
+    </div>
+
+    <!-- Improvement 4: share disclosure modal -->
+    <div id="share-modal" role="dialog" aria-modal="true" aria-label="Share privacy notice">
+        <div class="share-modal-box">
+            <h3>Before you share</h3>
+            <p>Sharing sends this message to a third-party service to generate a shareable link. Your data is not stored beyond link creation. This notice won't appear again.</p>
+            <div class="share-modal-btns">
+                <button id="share-confirm">Got it, share!</button>
+                <button id="share-cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <div class="app-container">
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h2>COMIC TIMELINE</h2>
-                <i data-lucide="x" id="close-sidebar" width="28" height="28" style="cursor:pointer;"></i>
+                <i data-lucide="x" id="close-sidebar" width="28" height="28" style="cursor:pointer;" aria-label="Close sidebar"></i>
             </div>
         </div>
 
         <div class="content-panel" id="content-panel">
-            <div class="progress-container">
+            <div class="progress-container" id="progress-container">
                 <div id="read-progress"></div>
             </div>
 
             <div id="empty-state">
-                <h1>COMIC <span style="color: var(--accent-red);">TIMELINE</span></h1>
+                <h1>COMIC <span style="color:var(--accent-red);">TIMELINE</span></h1>
                 <p>Select a story to begin reading</p>
+                <p style="margin-top:8px;font-size:0.78rem;opacity:0.5;">Press <kbd>?</kbd> for keyboard shortcuts</p>
             </div>
 
-            <div id="story-header" style="display:none; width:100%; max-width:700px;">
+            <div id="story-header" style="display:none;width:100%;max-width:700px;">
                 <div class="character-legend" id="character-legend"></div>
+                <!-- Improvement 3: chapter jump nav lives here -->
+                <div class="chapter-nav" id="chapter-nav"></div>
             </div>
 
             <div id="active-timeline-container" class="timeline"></div>
@@ -489,151 +598,251 @@
     <script>
         lucide.createIcons();
 
-        let storiesData = [];
+        /* ── State ── */
+        let storiesData     = [];
         let currentMessages = [];
-        let activeFilter = null;
+        let activeFilter    = null;
+        let currentStory    = -1;
+        let kbFocusIndex    = -1;
+        let chapters        = []; // [{label, startIndex, msgEl, pct}]
 
-        const contentPanel  = document.getElementById('content-panel');
-        const sidebar       = document.getElementById('sidebar');
-        const progressBar   = document.getElementById('read-progress');
-        const menuToggle    = document.getElementById('menu-toggle');
-        const closeSidebar  = document.getElementById('close-sidebar');
-        const installBtn    = document.getElementById('install-btn');
+        /* ── DOM refs ── */
+        const contentPanel      = document.getElementById('content-panel');
+        const sidebar           = document.getElementById('sidebar');
+        const progressBar       = document.getElementById('read-progress');
+        const progressContainer = document.getElementById('progress-container');
+        const menuToggle        = document.getElementById('menu-toggle');
+        const closeSidebarEl    = document.getElementById('close-sidebar');
+        const installBtn        = document.getElementById('install-btn');
+        const kbOverlay         = document.getElementById('kb-overlay');
+        const shareModal        = document.getElementById('share-modal');
 
-        let deferredPrompt = null;
+        let deferredPrompt  = null;
+        let pendingShareBtn = null;
+        let pendingShareMsg = null;
 
-        // FIX #10 — Use addEventListener instead of on* assignment.
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('open');
-            menuToggle.style.display = sidebar.classList.contains('open') ? 'none' : 'flex';
-        });
+        /* ── Improvement 2: character colour palette ── */
+        const CHAR_COLORS = [
+            { bg: '#FAEEDA', text: '#633806', border: '#BA7517' }, // amber
+            { bg: '#E1F5EE', text: '#085041', border: '#1D9E75' }, // teal
+            { bg: '#EEEDFE', text: '#26215C', border: '#7F77DD' }, // purple
+            { bg: '#FAECE7', text: '#4A1B0C', border: '#D85A30' }, // coral
+            { bg: '#FBEAF0', text: '#4B1528', border: '#D4537E' }, // pink
+            { bg: '#E6F1FB', text: '#042C53', border: '#378ADD' }, // blue
+        ];
 
-        closeSidebar.addEventListener('click', () => {
-            sidebar.classList.remove('open');
-            menuToggle.style.display = 'flex';
-        });
+        const charColorCache = new Map();
 
-        // FIX #10 — passive: true improves scroll performance on mobile.
-        contentPanel.addEventListener('scroll', () => {
-            const winScroll = contentPanel.scrollTop;
-            const height    = contentPanel.scrollHeight - contentPanel.clientHeight;
-            progressBar.style.width = (height > 0) ? (winScroll / height) * 100 + '%' : '0%';
-        }, { passive: true });
+        function hashName(name) {
+            let h = 0;
+            for (let i = 0; i < name.length; i++) h = (Math.imul(31, h) + name.charCodeAt(i)) | 0;
+            return Math.abs(h);
+        }
 
-        // FIX #1 — Sanitize helper: encodes user-supplied strings before
-        // inserting into HTML. Use this instead of raw template-literal injection.
+        function getCharColor(username) {
+            if (!username) return CHAR_COLORS[0];
+            if (!charColorCache.has(username)) {
+                charColorCache.set(username, CHAR_COLORS[hashName(username) % CHAR_COLORS.length]);
+            }
+            return charColorCache.get(username);
+        }
+
+        function getInitials(username) {
+            if (!username) return '?';
+            return username.trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        }
+
+        /* ── Security helpers ── */
         function sanitizeHTML(str) {
             const div = document.createElement('div');
             div.textContent = String(str ?? '');
             return div.innerHTML;
         }
 
-        // FIX #3 — URL allow-list: only accept http(s) URLs for attachments.
         function safeURL(url) {
             if (typeof url !== 'string') return null;
             return /^https?:\/\//i.test(url.trim()) ? url.trim() : null;
         }
 
+        /* ── Sidebar helpers ── */
+        function openSidebar() {
+            sidebar.classList.add('open');
+            menuToggle.style.display = 'none';
+        }
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            menuToggle.style.display = 'flex';
+        }
+
+        menuToggle.addEventListener('click', () =>
+            sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
+        closeSidebarEl.addEventListener('click', closeSidebar);
+
+        /* ── Improvement 5: swipe gesture ── */
+        let touchStartX = 0, touchStartY = 0;
+
+        contentPanel.addEventListener('touchstart', e => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        contentPanel.addEventListener('touchend', e => {
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            const dy = e.changedTouches[0].clientY - touchStartY;
+            if (Math.abs(dx) > Math.abs(dy) * 1.5 && dx > 60 && touchStartX < 32) openSidebar();
+        }, { passive: true });
+
+        sidebar.addEventListener('touchstart', e => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        sidebar.addEventListener('touchend', e => {
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            const dy = e.changedTouches[0].clientY - touchStartY;
+            if (Math.abs(dx) > Math.abs(dy) * 1.5 && dx < -60) closeSidebar();
+        }, { passive: true });
+
+        /* ── Progress + chapter update on scroll ── */
+        contentPanel.addEventListener('scroll', () => {
+            const h = contentPanel.scrollHeight - contentPanel.clientHeight;
+            progressBar.style.width = h > 0 ? (contentPanel.scrollTop / h) * 100 + '%' : '0%';
+            updateCurrentChapter(contentPanel.scrollTop);
+        }, { passive: true });
+
+        function updateCurrentChapter(scrollTop) {
+            if (!chapters.length) return;
+            let current = 0;
+            chapters.forEach((ch, i) => {
+                if (ch.msgEl && ch.msgEl.offsetTop <= scrollTop + 120) current = i;
+            });
+            document.querySelectorAll('.chapter-btn').forEach((btn, i) =>
+                btn.classList.toggle('current', i === current));
+        }
+
+        /* ── Improvement 3: chapter tick marks ── */
+        function renderChapterTicks() {
+            progressContainer.querySelectorAll('.chapter-tick').forEach(t => t.remove());
+            chapters.forEach(ch => {
+                if (ch.pct > 0 && ch.pct < 100) {
+                    const tick = document.createElement('div');
+                    tick.className = 'chapter-tick';
+                    tick.style.left = ch.pct + '%';
+                    progressContainer.appendChild(tick);
+                }
+            });
+        }
+
+        function computeChapterPositions() {
+            const total = contentPanel.scrollHeight - contentPanel.clientHeight;
+            if (total <= 0) return;
+            chapters.forEach(ch => {
+                ch.pct = ch.msgEl ? (ch.msgEl.offsetTop / total) * 100 : 0;
+            });
+            renderChapterTicks();
+        }
+
+        /* ── Filter ── */
         function toggleFilter(username) {
             const container = document.getElementById('active-timeline-container');
-            const pills = document.querySelectorAll('.legend-pill');
-
             if (activeFilter === username) {
                 activeFilter = null;
                 container.classList.remove('is-filtering');
-                pills.forEach(p => p.classList.remove('filtering'));
+                document.querySelectorAll('.legend-pill').forEach(p => {
+                    p.classList.remove('filtering');
+                    p.style.background = '';
+                    p.style.borderColor = '';
+                });
             } else {
                 activeFilter = username;
                 container.classList.add('is-filtering');
-                pills.forEach(p => p.classList.toggle('filtering', p.dataset.user === username));
-                container.querySelectorAll('.message').forEach(msg => {
-                    msg.classList.toggle('highlight', msg.dataset.author === username);
+                const color = getCharColor(username);
+                document.querySelectorAll('.legend-pill').forEach(p => {
+                    const match = p.dataset.user === username;
+                    p.classList.toggle('filtering', match);
+                    p.style.background  = match ? color.border : '';
+                    p.style.borderColor = match ? color.border : '';
                 });
+                container.querySelectorAll('.message').forEach(msg =>
+                    msg.classList.toggle('highlight', msg.dataset.author === username));
             }
         }
 
+        /* ── Attachment renderer ── */
         function createAttachmentHTML(attach) {
-            // FIX #11 — Guard against non-object or missing fields up front.
             if (!attach || typeof attach.type !== 'string' || typeof attach.url !== 'string') return '';
-
-            // FIX #3 — Validate URL scheme before any use.
-            const url  = safeURL(attach.url);
-            if (!url) {
-                console.warn('Attachment URL rejected (invalid scheme):', attach.url);
-                return '';
-            }
-
+            const url = safeURL(attach.url);
+            if (!url) { console.warn('Attachment URL rejected:', attach.url); return ''; }
             const type = attach.type.toLowerCase();
-            const wrap = 'margin-top:10px; border:3px solid var(--border-color); border-radius:8px; overflow:hidden;';
+            const wrap = 'margin-top:10px;border:3px solid var(--border-color);border-radius:8px;overflow:hidden;';
 
-            if (type === 'video') {
-                return `<div style="${wrap}"><video controls style="width:100%; display:block;" src="${url}"></video></div>`;
-            }
-            if (type === 'image') {
-                return `<div style="${wrap}"><img src="${url}" style="width:100%; display:block;" loading="lazy" decoding="async"></div>`;
-            }
-            if (type === 'audio') {
-                return `<div style="margin-top:10px;"><audio controls style="width:100%;" src="${url}"></audio></div>`;
-            }
+            if (type === 'video') return `<div style="${wrap}"><video controls style="width:100%;display:block;" src="${url}"></video></div>`;
+            if (type === 'image') return `<div style="${wrap}"><img src="${url}" style="width:100%;display:block;" loading="lazy" decoding="async"></div>`;
+            if (type === 'audio') return `<div style="margin-top:10px;"><audio controls style="width:100%;" src="${url}"></audio></div>`;
+
             if (type === 'youtube') {
-                const youtubeRegex = /(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-                const match   = url.match(youtubeRegex);
-                const videoId = match ? match[1] : null;
-
-                if (!videoId) {
-                    // FIX #3 — Use sanitizeHTML for the display label; url already validated above.
-                    return `<div style="margin-top:10px; padding:12px; background:#fff;"><a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-red); font-weight:900;">🎥 Watch on YouTube →</a></div>`;
-                }
-
-                return `<div style="${wrap} position:relative; padding-bottom:56.25%; height:0;">
-                    <iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;"
-                            src="https://www.youtube.com/embed/${videoId}"
-                            frameborder="0"
-                            allowfullscreen
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
-                    </iframe>
-                </div>`;
+                const m = url.match(/(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+                const vid = m ? m[1] : null;
+                if (!vid) return `<div style="margin-top:10px;padding:12px;background:#fff;"><a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-red);font-weight:900;">Watch on YouTube</a></div>`;
+                return `<div style="${wrap}position:relative;padding-bottom:56.25%;height:0;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" src="https://www.youtube.com/embed/${vid}" frameborder="0" allowfullscreen allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"></iframe></div>`;
             }
 
-            // FIX #11 — Log unknown types so data issues surface during development.
             console.warn('Unknown attachment type:', type);
             return '';
         }
 
+        /* ── Improvement 4: share with one-time disclosure ── */
+        const SHARE_CONSENT_KEY  = 'comic_share_consented';
+        let shareConsentGiven    = localStorage.getItem(SHARE_CONSENT_KEY) === '1';
+
         function handleShareClick(btn, msgIndex) {
             const m = currentMessages[msgIndex];
-            if (m) shareMessage(btn, m);
+            if (!m) return;
+            if (shareConsentGiven) { doShare(btn, m); return; }
+            pendingShareBtn = btn;
+            pendingShareMsg = m;
+            shareModal.classList.add('visible');
         }
 
-        async function shareMessage(btn, m) {
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = 'Wait...';
-            btn.disabled = true;
+        document.getElementById('share-confirm').addEventListener('click', () => {
+            shareConsentGiven = true;
+            localStorage.setItem(SHARE_CONSENT_KEY, '1');
+            shareModal.classList.remove('visible');
+            if (pendingShareBtn && pendingShareMsg) {
+                doShare(pendingShareBtn, pendingShareMsg);
+                pendingShareBtn = pendingShareMsg = null;
+            }
+        });
 
+        document.getElementById('share-cancel').addEventListener('click', () => {
+            shareModal.classList.remove('visible');
+            pendingShareBtn = pendingShareMsg = null;
+        });
+
+        async function doShare(btn, m) {
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML  = 'Wait...';
+            btn.disabled   = true;
             try {
-                const response = await fetch('https://content-sharer-ten.vercel.app/api/share', {
+                const res  = await fetch('https://content-sharer-ten.vercel.app/api/share', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        text:      m.text,
-                        sender:    (m.sender === 'me' || m.sender === 'right') ? 'right' : 'left',
-                        timestamp: m.timestamp || new Date().toLocaleString(),
-                        username:  m.username || 'User',
-                        photoUrl:  `https://via.placeholder.com/40?text=${encodeURIComponent(m.username || 'User')}`,
+                        text:       m.text,
+                        sender:     (m.sender === 'me' || m.sender === 'right') ? 'right' : 'left',
+                        timestamp:  m.timestamp || new Date().toLocaleString(),
+                        username:   m.username  || 'User',
+                        photoUrl:   `https://via.placeholder.com/40?text=${encodeURIComponent(m.username || 'User')}`,
                         attachment: m.attachment
                     })
                 });
-
-                const data = await response.json();
+                const data = await res.json();
                 if (data.success && data.link) {
                     await navigator.clipboard.writeText(data.link);
                     btn.style.background = '#4ade80';
                     btn.innerHTML = '<i data-lucide="check" width="14" height="14"></i> COPIED!';
-                    // FIX #9 — Scope icon refresh to the button only.
                     lucide.createIcons({ nodes: [btn] });
-                } else {
-                    throw new Error('Share API failed');
-                }
+                } else { throw new Error('Share API failed'); }
             } catch (err) {
                 console.error('Share failed', err);
                 btn.innerHTML = 'ERROR!';
@@ -642,93 +851,157 @@
                     btn.innerHTML = originalHTML;
                     btn.style.background = '';
                     btn.disabled = false;
-                    // FIX #9 — Scope icon refresh to the button only.
                     lucide.createIcons({ nodes: [btn] });
                 }, 3000);
             }
         }
 
+        /* ── Improvement 6: keyboard overlay ── */
+        function openKbOverlay()  { kbOverlay.classList.add('visible'); }
+        function closeKbOverlay() { kbOverlay.classList.remove('visible'); }
+
+        document.getElementById('kb-help-btn').addEventListener('click', openKbOverlay);
+        document.getElementById('kb-close-btn').addEventListener('click', closeKbOverlay);
+        kbOverlay.addEventListener('click', e => { if (e.target === kbOverlay) closeKbOverlay(); });
+
+        /* ── Improvement 6: keyboard navigation ── */
+        function getMessageEls() {
+            return Array.from(document.querySelectorAll('#active-timeline-container .message'));
+        }
+
+        function setKbFocus(index) {
+            const msgs = getMessageEls();
+            if (!msgs.length) return;
+            index = Math.max(0, Math.min(msgs.length - 1, index));
+            msgs.forEach((m, i) => m.classList.toggle('kb-focused', i === index));
+            kbFocusIndex = index;
+            msgs[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        document.addEventListener('keydown', e => {
+            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+
+            const anyOverlay = kbOverlay.classList.contains('visible') ||
+                               shareModal.classList.contains('visible');
+
+            if (e.key === '?' || e.key === '/') {
+                e.preventDefault();
+                anyOverlay ? closeKbOverlay() : openKbOverlay();
+                return;
+            }
+            if (e.key === 'Escape') {
+                if (kbOverlay.classList.contains('visible'))  { closeKbOverlay(); return; }
+                if (shareModal.classList.contains('visible')) { shareModal.classList.remove('visible'); return; }
+                if (sidebar.classList.contains('open'))       { closeSidebar(); return; }
+                if (activeFilter)                             { toggleFilter(activeFilter); return; }
+                return;
+            }
+            if (anyOverlay) return;
+
+            if (e.key === 'j' || e.key === 'J') { e.preventDefault(); setKbFocus(kbFocusIndex + 1); }
+            if (e.key === 'k' || e.key === 'K') { e.preventDefault(); setKbFocus(kbFocusIndex - 1); }
+
+            if (e.key === 'ArrowRight' && currentStory < storiesData.length - 1) {
+                e.preventDefault(); loadStory(currentStory + 1);
+            }
+            if (e.key === 'ArrowLeft' && currentStory > 0) {
+                e.preventDefault(); loadStory(currentStory - 1);
+            }
+            if ((e.key === 'f' || e.key === 'F') && kbFocusIndex >= 0) {
+                const msgs = getMessageEls();
+                const focused = msgs[kbFocusIndex];
+                if (focused) toggleFilter(focused.dataset.author);
+            }
+        });
+
+        /* ── Load story ── */
         function loadStory(index) {
             const story     = storiesData[index];
             currentMessages = story.messages;
-            const container = document.getElementById('active-timeline-container');
-            const legend    = document.getElementById('character-legend');
+            currentStory    = index;
+            kbFocusIndex    = -1;
 
-            // FIX #7 — Clear container BEFORE adjusting filter state so no
-            // stale highlighted messages remain visible during any async gap.
+            const container  = document.getElementById('active-timeline-container');
+            const legend     = document.getElementById('character-legend');
+            const chapterNav = document.getElementById('chapter-nav');
+
+            // Clear before state reset (security fix #7)
             container.innerHTML = '';
             activeFilter = null;
             container.classList.remove('is-filtering');
 
-            document.getElementById('empty-state').style.display = 'none';
+            document.getElementById('empty-state').style.display  = 'none';
             document.getElementById('story-header').style.display = 'block';
             container.classList.add('active');
+            charColorCache.clear();
 
-            // FIX #5 — Restore menu toggle button visibility on mobile after
-            // closing the sidebar when a story is selected.
-            if (window.innerWidth <= 900) {
-                sidebar.classList.remove('open');
-                menuToggle.style.display = 'flex';
-            }
+            // Improvement 5: restore menu toggle on mobile
+            if (window.innerWidth <= 900) closeSidebar();
 
-            document.querySelectorAll('.story-item').forEach((el, idx) => {
-                el.classList.toggle('active', idx === index);
-            });
+            document.querySelectorAll('.story-item').forEach((el, idx) =>
+                el.classList.toggle('active', idx === index));
 
-            // FIX #2 — Build legend pills with DOM methods instead of HTML
-            // template literals so username values are never injected into
-            // attribute strings or onclick handlers.
+            /* ── Improvement 2: build legend with character colours ── */
             legend.innerHTML = '';
             const charMap = new Map();
             story.messages.forEach(m => {
-                if (m.username && !charMap.has(m.username)) {
-                    charMap.set(m.username, true);
-                }
+                if (m.username && !charMap.has(m.username)) charMap.set(m.username, true);
             });
 
             charMap.forEach((_, name) => {
-                const pill = document.createElement('div');
-                pill.className  = 'legend-pill';
+                const color = getCharColor(name);
+                const pill  = document.createElement('div');
+                pill.className    = 'legend-pill';
                 pill.dataset.user = name;
+                pill.style.borderColor = color.border;
 
-                const icon = document.createElement('i');
-                icon.dataset.lucide = 'circle-user';
-                icon.setAttribute('width', '16');
-                icon.setAttribute('height', '16');
+                const avatar = document.createElement('div');
+                avatar.className   = 'legend-avatar';
+                avatar.style.background = color.bg;
+                avatar.style.color      = color.text;
+                avatar.textContent      = getInitials(name);
 
                 const label = document.createElement('span');
-                label.textContent = name; // safe: textContent never executes markup
+                label.textContent = name;
 
-                pill.appendChild(icon);
+                pill.appendChild(avatar);
                 pill.appendChild(label);
-
-                // FIX #2 — Attach handler via addEventListener; no string injection.
                 pill.addEventListener('click', () => toggleFilter(name));
                 legend.appendChild(pill);
             });
 
+            /* ── Improvement 3: group messages into chapters by date ── */
+            chapters = [];
+            const datesSeen = new Map();
+            story.messages.forEach((m, i) => {
+                const raw   = m.timestamp || '';
+                // Use the first space-delimited token as the date key; fall back to 'Start'
+                const label = raw.trim().split(/[\s,T]/)[0] || 'Start';
+                if (!datesSeen.has(label)) {
+                    datesSeen.set(label, i);
+                    chapters.push({ label, startIndex: i, msgEl: null, pct: 0 });
+                }
+            });
+
+            /* ── Build message elements ── */
             const fragment = document.createDocumentFragment();
 
             story.messages.forEach((m, i) => {
                 const sideClass = (m.sender === 'right' || m.sender === 'me') ? 'right' : 'left';
+                const color     = getCharColor(m.username);
 
                 const msgDiv = document.createElement('div');
-                msgDiv.className = `message ${sideClass}`;
+                msgDiv.className      = `message ${sideClass}`;
                 msgDiv.dataset.author = m.username || 'Unknown';
 
-                // Build skeleton with safe static strings only.
-                // FIX #1 — username and timestamp are NOT interpolated here;
-                // they are set via textContent after element creation.
                 msgDiv.innerHTML = `
                     <div class="dialog-date"></div>
                     <div class="message-body">
                         <div class="dialog-number">#${i + 1}</div>
-                        <div class="avatar">
-                            <i data-lucide="circle-user"></i>
-                        </div>
+                        <div class="avatar"></div>
                         <div class="message-content">
                             <div class="username"></div>
-                            <div class="message-text" style="font-size:0.96rem; line-height:1.35; padding-bottom:15px;"></div>
+                            <div class="message-text" style="font-size:0.96rem;line-height:1.35;padding-bottom:15px;"></div>
                             ${createAttachmentHTML(m.attachment)}
                             <button class="share-btn">
                                 <i data-lucide="zap" width="14" height="14"></i>
@@ -738,12 +1011,25 @@
                     </div>
                 `;
 
-                // FIX #1 — Set all user-supplied content via textContent.
-                msgDiv.querySelector('.dialog-date').textContent  = m.timestamp || 'STORY START';
+                // Safe text assignment (security fix #1)
+                msgDiv.querySelector('.dialog-date').textContent  = m.timestamp || 'Story start';
                 msgDiv.querySelector('.username').textContent     = m.username  || 'Unknown';
                 msgDiv.querySelector('.message-text').textContent = m.text      || '';
 
-                // Attach share handler safely via addEventListener.
+                // Improvement 2: apply character colour
+                const avatarEl  = msgDiv.querySelector('.avatar');
+                avatarEl.textContent      = getInitials(m.username);
+                avatarEl.style.background = color.bg;
+                avatarEl.style.color      = color.text;
+                avatarEl.style.borderColor = color.border;
+
+                msgDiv.querySelector('.username').style.color = color.border;
+
+                const contentEl = msgDiv.querySelector('.message-content');
+                if (sideClass === 'left')  contentEl.style.borderLeftColor  = color.border;
+                if (sideClass === 'right') contentEl.style.borderRightColor = color.border;
+
+                // Share button (via addEventListener — security fix)
                 const shareBtn = msgDiv.querySelector('.share-btn');
                 shareBtn.addEventListener('click', () => handleShareClick(shareBtn, i));
 
@@ -751,15 +1037,39 @@
             });
 
             container.appendChild(fragment);
+
+            // Wire chapter msgEl references now that elements are in the DOM
+            const allMsgEls = container.querySelectorAll('.message');
+            chapters.forEach(ch => { ch.msgEl = allMsgEls[ch.startIndex] || null; });
+
+            /* ── Improvement 3: render chapter nav buttons ── */
+            chapterNav.innerHTML = '';
+            chapters.forEach((ch, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'chapter-btn' + (i === 0 ? ' current' : '');
+
+                const numSpan = document.createElement('span');
+                numSpan.className   = 'chapter-btn-num';
+                numSpan.textContent = i + 1;
+
+                btn.appendChild(numSpan);
+                btn.appendChild(document.createTextNode('\u00a0' + ch.label));
+                btn.addEventListener('click', () => {
+                    if (ch.msgEl) ch.msgEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                chapterNav.appendChild(btn);
+            });
+
             contentPanel.scrollTo({ top: 0, behavior: 'instant' });
             progressBar.style.width = '0%';
 
-            // FIX #9 — Scope lucide to just the newly added nodes rather than
-            // scanning the entire document on every story load.
             lucide.createIcons({ nodes: Array.from(container.querySelectorAll('[data-lucide]')) });
-            lucide.createIcons({ nodes: Array.from(legend.querySelectorAll('[data-lucide]')) });
+
+            // Compute tick positions after layout settles
+            requestAnimationFrame(() => requestAnimationFrame(computeChapterPositions));
         }
 
+        /* ── Init: load stories with metadata (Improvement 1) ── */
         async function init() {
             try {
                 const res = await fetch('https://static-conf.vercel.app/go/this-and-that', {
@@ -767,43 +1077,70 @@
                 });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-                const text = await res.text();
-                storiesData = JSON.parse(text);
+                storiesData = JSON.parse(await res.text());
+
+                // Track seen stories for NEW badge
+                const SEEN_KEY  = 'comic_seen_stories';
+                const seenStore = JSON.parse(localStorage.getItem(SEEN_KEY) || '{}');
 
                 storiesData.forEach((story, index) => {
+                    const storyId  = story.id || story.name || index;
+                    const msgCount = (story.messages || []).length;
+                    const charSet  = new Set((story.messages || []).map(m => m.username).filter(Boolean));
+                    const isNew    = !seenStore[storyId];
+
                     const div = document.createElement('div');
                     div.className = 'story-item';
 
                     const icon = document.createElement('i');
                     icon.dataset.lucide = 'book-open';
-                    icon.setAttribute('width', '20');
-                    icon.setAttribute('height', '20');
+                    icon.setAttribute('width', '18');
+                    icon.setAttribute('height', '18');
+                    icon.style.flexShrink = '0';
 
-                    const label = document.createElement('span');
-                    label.textContent = story.name || 'Unnamed Story'; // safe
+                    const titleSpan = document.createElement('span');
+                    titleSpan.className   = 'story-item-title';
+                    titleSpan.textContent = story.name || 'Unnamed Story';
+
+                    const metaSpan = document.createElement('span');
+                    metaSpan.className   = 'story-meta';
+                    metaSpan.textContent =
+                        `${msgCount} msg${msgCount !== 1 ? 's' : ''} · ${charSet.size} char${charSet.size !== 1 ? 's' : ''}`;
 
                     div.appendChild(icon);
-                    div.appendChild(label);
-                    div.addEventListener('click', () => loadStory(index));
+                    div.appendChild(titleSpan);
+                    div.appendChild(metaSpan);
+
+                    if (isNew) {
+                        const badge = document.createElement('span');
+                        badge.className   = 'story-new-badge';
+                        badge.textContent = 'NEW';
+                        div.appendChild(badge);
+                    }
+
+                    div.addEventListener('click', () => {
+                        seenStore[storyId] = 1;
+                        localStorage.setItem(SEEN_KEY, JSON.stringify(seenStore));
+                        div.querySelector('.story-new-badge')?.remove();
+                        loadStory(index);
+                    });
+
                     sidebar.appendChild(div);
                 });
 
-                // FIX #9 — Scope to newly added sidebar items only.
                 lucide.createIcons({ nodes: Array.from(sidebar.querySelectorAll('[data-lucide]')) });
 
             } catch (err) {
                 console.error('Load failed:', err);
-
-                // FIX #6 — Use insertAdjacentHTML instead of innerHTML += to
-                // avoid re-serialising and destroying existing sidebar item listeners.
-                const errP = document.createElement('p');
-                errP.style.cssText = 'color:red; padding:16px; text-align:center;';
-                errP.textContent = 'Failed to load stories.';
-                sidebar.insertAdjacentElement('beforeend', errP);
+                const p = document.createElement('p');
+                p.style.cssText = 'color:red;padding:16px;text-align:center;';
+                p.textContent   = 'Failed to load stories.';
+                sidebar.insertAdjacentElement('beforeend', p);  // security fix #6
             }
         }
 
-        window.addEventListener('beforeinstallprompt', (e) => {
+        /* ── PWA install ── */
+        window.addEventListener('beforeinstallprompt', e => {
             e.preventDefault();
             deferredPrompt = e;
             installBtn.style.display = 'flex';
@@ -818,9 +1155,8 @@
         });
 
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch(err => console.error(err));
-            });
+            window.addEventListener('load', () =>
+                navigator.serviceWorker.register('/sw.js').catch(err => console.error(err)));
         }
 
         init();
