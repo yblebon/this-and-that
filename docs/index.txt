@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comic Timeline</title>
-
+    
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#ef4444">
-
+    
     <script src="https://unpkg.com/lucide@0.574.0/dist/umd/lucide.min.js"></script>
-
+    
     <style>
         :root {
             --bg-color: #fafaf9;
@@ -21,7 +21,7 @@
             --sidebar-width: 280px;
             --comic-font: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive, sans-serif;
         }
-
+        
         body, html {
             height: 100%;
             margin: 0;
@@ -477,7 +477,7 @@
                 <h1>COMIC <span style="color: var(--accent-red);">TIMELINE</span></h1>
                 <p>Select a story to begin reading</p>
             </div>
-
+            
             <div id="story-header" style="display:none; width:100%; max-width:700px;">
                 <div class="character-legend" id="character-legend"></div>
             </div>
@@ -492,52 +492,35 @@
         let storiesData = [];
         let currentMessages = [];
         let activeFilter = null;
-
-        const contentPanel  = document.getElementById('content-panel');
-        const sidebar       = document.getElementById('sidebar');
-        const progressBar   = document.getElementById('read-progress');
-        const menuToggle    = document.getElementById('menu-toggle');
-        const closeSidebar  = document.getElementById('close-sidebar');
-        const installBtn    = document.getElementById('install-btn');
+        const contentPanel = document.getElementById('content-panel');
+        const sidebar = document.getElementById('sidebar');
+        const progressBar = document.getElementById('read-progress');
+        const menuToggle = document.getElementById('menu-toggle');
+        const closeSidebar = document.getElementById('close-sidebar');
+        const installBtn = document.getElementById('install-btn');
 
         let deferredPrompt = null;
 
-        // FIX #10 — Use addEventListener instead of on* assignment.
-        menuToggle.addEventListener('click', () => {
+        menuToggle.onclick = () => {
             sidebar.classList.toggle('open');
             menuToggle.style.display = sidebar.classList.contains('open') ? 'none' : 'flex';
-        });
+        };
 
-        closeSidebar.addEventListener('click', () => {
+        closeSidebar.onclick = () => {
             sidebar.classList.remove('open');
             menuToggle.style.display = 'flex';
-        });
+        };
 
-        // FIX #10 — passive: true improves scroll performance on mobile.
-        contentPanel.addEventListener('scroll', () => {
+        contentPanel.onscroll = () => {
             const winScroll = contentPanel.scrollTop;
-            const height    = contentPanel.scrollHeight - contentPanel.clientHeight;
-            progressBar.style.width = (height > 0) ? (winScroll / height) * 100 + '%' : '0%';
-        }, { passive: true });
-
-        // FIX #1 — Sanitize helper: encodes user-supplied strings before
-        // inserting into HTML. Use this instead of raw template-literal injection.
-        function sanitizeHTML(str) {
-            const div = document.createElement('div');
-            div.textContent = String(str ?? '');
-            return div.innerHTML;
-        }
-
-        // FIX #3 — URL allow-list: only accept http(s) URLs for attachments.
-        function safeURL(url) {
-            if (typeof url !== 'string') return null;
-            return /^https?:\/\//i.test(url.trim()) ? url.trim() : null;
-        }
+            const height = contentPanel.scrollHeight - contentPanel.clientHeight;
+            progressBar.style.width = (height > 0) ? (winScroll / height) * 100 + "%" : "0%";
+        };
 
         function toggleFilter(username) {
             const container = document.getElementById('active-timeline-container');
             const pills = document.querySelectorAll('.legend-pill');
-
+            
             if (activeFilter === username) {
                 activeFilter = null;
                 container.classList.remove('is-filtering');
@@ -553,53 +536,41 @@
         }
 
         function createAttachmentHTML(attach) {
-            // FIX #11 — Guard against non-object or missing fields up front.
-            if (!attach || typeof attach.type !== 'string' || typeof attach.url !== 'string') return '';
-
-            // FIX #3 — Validate URL scheme before any use.
-            const url  = safeURL(attach.url);
-            if (!url) {
-                console.warn('Attachment URL rejected (invalid scheme):', attach.url);
-                return '';
-            }
-
+            if (!attach || !attach.type || !attach.url) return '';
             const type = attach.type.toLowerCase();
-            const wrap = 'margin-top:10px; border:3px solid var(--border-color); border-radius:8px; overflow:hidden;';
+            const wrap = "margin-top:10px; border:3px solid var(--border-color); border-radius:8px; overflow:hidden;";
 
             if (type === 'video') {
-                return `<div style="${wrap}"><video controls style="width:100%; display:block;" src="${url}"></video></div>`;
+                return `<div style="${wrap}"><video controls style="width:100%; display:block;" src="${attach.url}"></video></div>`;
             }
             if (type === 'image') {
-                return `<div style="${wrap}"><img src="${url}" style="width:100%; display:block;" loading="lazy" decoding="async"></div>`;
+                return `<div style="${wrap}"><img src="${attach.url}" style="width:100%; display:block;" loading="lazy" decoding="async"></div>`;
             }
             if (type === 'audio') {
-                return `<div style="margin-top:10px;"><audio controls style="width:100%;" src="${url}"></audio></div>`;
+                return `<div style="margin-top:10px;"><audio controls style="width:100%;" src="${attach.url}"></audio></div>`;
             }
             if (type === 'youtube') {
                 const youtubeRegex = /(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-                const match   = url.match(youtubeRegex);
+                const match = attach.url.match(youtubeRegex);
                 const videoId = match ? match[1] : null;
 
                 if (!videoId) {
-                    // FIX #3 — Use sanitizeHTML for the display label; url already validated above.
-                    return `<div style="margin-top:10px; padding:12px; background:#fff;"><a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-red); font-weight:900;">🎥 Watch on YouTube →</a></div>`;
+                    return `<div style="margin-top:10px; padding:12px; background:#fff;"><a href="${attach.url}" target="_blank" style="color:var(--accent-red); font-weight:900;">🎥 Watch on YouTube →</a></div>`;
                 }
 
                 return `<div style="${wrap} position:relative; padding-bottom:56.25%; height:0;">
-                    <iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;"
-                            src="https://www.youtube.com/embed/${videoId}"
-                            frameborder="0"
-                            allowfullscreen
+                    <iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;" 
+                            src="https://www.youtube.com/embed/${videoId}" 
+                            frameborder="0" 
+                            allowfullscreen 
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
                     </iframe>
                 </div>`;
             }
-
-            // FIX #11 — Log unknown types so data issues surface during development.
-            console.warn('Unknown attachment type:', type);
             return '';
         }
 
+        // Updated for safety: We use a simple index and ID, but the actual data is pulled from the JavaScript array
         function handleShareClick(btn, msgIndex) {
             const m = currentMessages[msgIndex];
             if (m) shareMessage(btn, m);
@@ -611,15 +582,16 @@
             btn.disabled = true;
 
             try {
+                // We send the data as a pure JSON object. No raw string injection into attributes.
                 const response = await fetch('https://content-sharer-ten.vercel.app/api/share', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        text:      m.text,
-                        sender:    (m.sender === 'me' || m.sender === 'right') ? 'right' : 'left',
+                        text: m.text,
+                        sender: (m.sender === 'me' || m.sender === 'right') ? 'right' : 'left',
                         timestamp: m.timestamp || new Date().toLocaleString(),
-                        username:  m.username || 'User',
-                        photoUrl:  `https://via.placeholder.com/40?text=${encodeURIComponent(m.username || 'User')}`,
+                        username: m.username || 'User',
+                        photoUrl: `https://via.placeholder.com/40?text=${encodeURIComponent(m.username || 'User')}`,
                         attachment: m.attachment
                     })
                 });
@@ -627,58 +599,43 @@
                 const data = await response.json();
                 if (data.success && data.link) {
                     await navigator.clipboard.writeText(data.link);
-                    btn.style.background = '#4ade80';
+                    btn.style.background = "#4ade80"; 
                     btn.innerHTML = '<i data-lucide="check" width="14" height="14"></i> COPIED!';
-                    // FIX #9 — Scope icon refresh to the button only.
-                    lucide.createIcons({ nodes: [btn] });
+                    lucide.createIcons();
                 } else {
                     throw new Error('Share API failed');
                 }
             } catch (err) {
-                console.error('Share failed', err);
+                console.error("Share failed", err);
                 btn.innerHTML = 'ERROR!';
             } finally {
                 setTimeout(() => {
                     btn.innerHTML = originalHTML;
-                    btn.style.background = '';
+                    btn.style.background = "";
                     btn.disabled = false;
-                    // FIX #9 — Scope icon refresh to the button only.
-                    lucide.createIcons({ nodes: [btn] });
+                    lucide.createIcons();
                 }, 3000);
             }
         }
 
         function loadStory(index) {
-            const story     = storiesData[index];
+            const story = storiesData[index];
             currentMessages = story.messages;
             const container = document.getElementById('active-timeline-container');
-            const legend    = document.getElementById('character-legend');
-
-            // FIX #7 — Clear container BEFORE adjusting filter state so no
-            // stale highlighted messages remain visible during any async gap.
-            container.innerHTML = '';
+            const legend = document.getElementById('character-legend');
+            
             activeFilter = null;
-            container.classList.remove('is-filtering');
-
             document.getElementById('empty-state').style.display = 'none';
             document.getElementById('story-header').style.display = 'block';
+            container.classList.remove('is-filtering');
             container.classList.add('active');
-
-            // FIX #5 — Restore menu toggle button visibility on mobile after
-            // closing the sidebar when a story is selected.
-            if (window.innerWidth <= 900) {
-                sidebar.classList.remove('open');
-                menuToggle.style.display = 'flex';
-            }
+            
+            if (window.innerWidth <= 900) sidebar.classList.remove('open');
 
             document.querySelectorAll('.story-item').forEach((el, idx) => {
                 el.classList.toggle('active', idx === index);
             });
 
-            // FIX #2 — Build legend pills with DOM methods instead of HTML
-            // template literals so username values are never injected into
-            // attribute strings or onclick handlers.
-            legend.innerHTML = '';
             const charMap = new Map();
             story.messages.forEach(m => {
                 if (m.username && !charMap.has(m.username)) {
@@ -686,51 +643,34 @@
                 }
             });
 
-            charMap.forEach((_, name) => {
-                const pill = document.createElement('div');
-                pill.className  = 'legend-pill';
-                pill.dataset.user = name;
-
-                const icon = document.createElement('i');
-                icon.dataset.lucide = 'circle-user';
-                icon.setAttribute('width', '16');
-                icon.setAttribute('height', '16');
-
-                const label = document.createElement('span');
-                label.textContent = name; // safe: textContent never executes markup
-
-                pill.appendChild(icon);
-                pill.appendChild(label);
-
-                // FIX #2 — Attach handler via addEventListener; no string injection.
-                pill.addEventListener('click', () => toggleFilter(name));
-                legend.appendChild(pill);
-            });
+            legend.innerHTML = Array.from(charMap.keys()).map(name => `
+                <div class="legend-pill" data-user="${name}" onclick="toggleFilter('${name}')">
+                    <i data-lucide="circle-user" width="16" height="16"></i>
+                    <span>${name}</span>
+                </div>
+            `).join('');
 
             const fragment = document.createDocumentFragment();
 
             story.messages.forEach((m, i) => {
                 const sideClass = (m.sender === 'right' || m.sender === 'me') ? 'right' : 'left';
-
                 const msgDiv = document.createElement('div');
                 msgDiv.className = `message ${sideClass}`;
                 msgDiv.dataset.author = m.username || 'Unknown';
-
-                // Build skeleton with safe static strings only.
-                // FIX #1 — username and timestamp are NOT interpolated here;
-                // they are set via textContent after element creation.
+                
+                // Note: uniqueId is removed from function call to avoid quote syntax errors in HTML attributes
                 msgDiv.innerHTML = `
-                    <div class="dialog-date"></div>
+                    <div class="dialog-date">${m.timestamp || 'STORY START'}</div>
                     <div class="message-body">
                         <div class="dialog-number">#${i + 1}</div>
                         <div class="avatar">
                             <i data-lucide="circle-user"></i>
                         </div>
                         <div class="message-content">
-                            <div class="username"></div>
+                            <div class="username">${m.username || 'Unknown'}</div>
                             <div class="message-text" style="font-size:0.96rem; line-height:1.35; padding-bottom:15px;"></div>
                             ${createAttachmentHTML(m.attachment)}
-                            <button class="share-btn">
+                            <button class="share-btn" onclick="handleShareClick(this, ${i})">
                                 <i data-lucide="zap" width="14" height="14"></i>
                                 SHARE!
                             </button>
@@ -738,26 +678,18 @@
                     </div>
                 `;
 
-                // FIX #1 — Set all user-supplied content via textContent.
-                msgDiv.querySelector('.dialog-date').textContent  = m.timestamp || 'STORY START';
-                msgDiv.querySelector('.username').textContent     = m.username  || 'Unknown';
-                msgDiv.querySelector('.message-text').textContent = m.text      || '';
-
-                // Attach share handler safely via addEventListener.
-                const shareBtn = msgDiv.querySelector('.share-btn');
-                shareBtn.addEventListener('click', () => handleShareClick(shareBtn, i));
+                // CRITICAL FIX: Always use .textContent to set user text to prevent XSS and quote breakage
+                msgDiv.querySelector('.message-text').textContent = m.text || '';
 
                 fragment.appendChild(msgDiv);
             });
 
+            container.innerHTML = '';
             container.appendChild(fragment);
             contentPanel.scrollTo({ top: 0, behavior: 'instant' });
-            progressBar.style.width = '0%';
+            progressBar.style.width = "0%";
 
-            // FIX #9 — Scope lucide to just the newly added nodes rather than
-            // scanning the entire document on every story load.
-            lucide.createIcons({ nodes: Array.from(container.querySelectorAll('[data-lucide]')) });
-            lucide.createIcons({ nodes: Array.from(legend.querySelectorAll('[data-lucide]')) });
+            lucide.createIcons();
         }
 
         async function init() {
@@ -766,40 +698,25 @@
                     headers: { 'Accept': 'application/json; charset=utf-8' }
                 });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
+                
                 const text = await res.text();
                 storiesData = JSON.parse(text);
 
+                const sidebarContent = document.getElementById('sidebar');
                 storiesData.forEach((story, index) => {
                     const div = document.createElement('div');
                     div.className = 'story-item';
-
-                    const icon = document.createElement('i');
-                    icon.dataset.lucide = 'book-open';
-                    icon.setAttribute('width', '20');
-                    icon.setAttribute('height', '20');
-
-                    const label = document.createElement('span');
-                    label.textContent = story.name || 'Unnamed Story'; // safe
-
-                    div.appendChild(icon);
-                    div.appendChild(label);
-                    div.addEventListener('click', () => loadStory(index));
-                    sidebar.appendChild(div);
+                    div.innerHTML = `<i data-lucide="book-open" width="20" height="20"></i> <span></span>`;
+                    div.querySelector('span').textContent = story.name || 'Unnamed Story';
+                    div.onclick = () => loadStory(index);
+                    sidebarContent.appendChild(div);
                 });
 
-                // FIX #9 — Scope to newly added sidebar items only.
-                lucide.createIcons({ nodes: Array.from(sidebar.querySelectorAll('[data-lucide]')) });
-
+                lucide.createIcons();
             } catch (err) {
-                console.error('Load failed:', err);
-
-                // FIX #6 — Use insertAdjacentHTML instead of innerHTML += to
-                // avoid re-serialising and destroying existing sidebar item listeners.
-                const errP = document.createElement('p');
-                errP.style.cssText = 'color:red; padding:16px; text-align:center;';
-                errP.textContent = 'Failed to load stories.';
-                sidebar.insertAdjacentElement('beforeend', errP);
+                console.error("Load failed:", err);
+                document.getElementById('sidebar').innerHTML += 
+                    '<p style="color:red; padding:16px; text-align:center;">Failed to load stories.</p>';
             }
         }
 
@@ -809,13 +726,13 @@
             installBtn.style.display = 'flex';
         });
 
-        installBtn.addEventListener('click', async () => {
+        installBtn.onclick = async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 deferredPrompt = null;
                 installBtn.style.display = 'none';
             }
-        });
+        };
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
