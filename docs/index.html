@@ -710,11 +710,20 @@
             updateCurrentChapter(contentPanel.scrollTop);
         }, { passive: true });
 
+        // Returns how far an element is from the top of the scroll container's
+        // scrollable content — i.e. the scrollTop value at which it would sit
+        // at the very top of the viewport.
+        function scrollOffsetOf(el) {
+            return el.getBoundingClientRect().top
+                 - contentPanel.getBoundingClientRect().top
+                 + contentPanel.scrollTop;
+        }
+
         function updateCurrentChapter(scrollTop) {
             if (!chapters.length) return;
             let current = 0;
             chapters.forEach((ch, i) => {
-                if (ch.msgEl && ch.msgEl.offsetTop <= scrollTop + 120) current = i;
+                if (ch.msgEl && scrollOffsetOf(ch.msgEl) <= scrollTop + 120) current = i;
             });
             document.querySelectorAll('.chapter-btn').forEach((btn, i) =>
                 btn.classList.toggle('current', i === current));
@@ -737,7 +746,9 @@
             const total = contentPanel.scrollHeight - contentPanel.clientHeight;
             if (total <= 0) return;
             chapters.forEach(ch => {
-                ch.pct = ch.msgEl ? (ch.msgEl.offsetTop / total) * 100 : 0;
+                // Tick should appear at the % of the scroll range where this
+                // chapter's first message reaches the top of the viewport.
+                ch.pct = ch.msgEl ? (scrollOffsetOf(ch.msgEl) / total) * 100 : 0;
             });
             renderChapterTicks();
         }
@@ -1158,6 +1169,11 @@
             window.addEventListener('load', () =>
                 navigator.serviceWorker.register('/sw.js').catch(err => console.error(err)));
         }
+
+        // Recompute tick positions whenever the layout changes
+        window.addEventListener('resize', () => {
+            if (chapters.length) computeChapterPositions();
+        });
 
         init();
     </script>
