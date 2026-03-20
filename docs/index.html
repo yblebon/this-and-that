@@ -194,41 +194,100 @@
             border: 1.5px solid rgba(0,0,0,0.2);
         }
 
-        /* Improvement 3: chapter jump nav */
-        .chapter-nav {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin: 0 0 14px;
+        /* Improvement 3: date range slider */
+        .chapter-slider-wrap {
             width: 100%;
             max-width: 700px;
+            margin: 0 0 18px;
+            padding: 28px 16px 10px;
+            background: white;
+            border: 3px solid var(--border-color);
+            border-radius: 6px;
+            box-shadow: 4px 4px 0 var(--border-color);
+            box-sizing: border-box;
+            user-select: none;
         }
-        .chapter-btn {
+        .chapter-slider-inner {
+            position: relative;
             display: flex;
             align-items: center;
-            gap: 5px;
-            padding: 4px 10px;
-            border: 2.5px solid var(--border-color);
-            border-radius: 4px;
-            background: white;
-            font-family: var(--comic-font);
-            font-size: 0.68rem;
+            gap: 10px;
+        }
+        .chapter-slider-end-label {
+            font-size: 0.62rem;
             font-weight: 900;
             text-transform: uppercase;
-            cursor: pointer;
-            box-shadow: 2px 2px 0 var(--border-color);
-            transition: all 0.12s;
+            white-space: nowrap;
+            flex-shrink: 0;
+            opacity: 0.55;
         }
-        .chapter-btn:hover { transform: translate(1px,-1px); box-shadow: 3px 3px 0 var(--border-color); }
-        .chapter-btn.current { background: var(--accent-red); color: white; transform: translate(1px,1px); box-shadow: 0 0 0; }
-        .chapter-btn-num {
+        .chapter-slider-track-wrap {
+            position: relative;
+            flex: 1;
+            height: 28px;
+            display: flex;
+            align-items: center;
+        }
+        .chapter-slider-track {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #e0e0e0;
+            border: 2px solid var(--border-color);
+            border-radius: 2px;
+        }
+        .chapter-slider-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: var(--accent-red);
+            border-radius: 2px;
+            pointer-events: none;
+        }
+        .chapter-thumb {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-red);
+            border: 3px solid var(--border-color);
+            box-shadow: 3px 3px 0 var(--border-color);
+            cursor: grab;
+            z-index: 4;
+            transition: left 0.18s ease;
+        }
+        .chapter-thumb:active  { cursor: grabbing; box-shadow: 1px 1px 0 var(--border-color); }
+        .chapter-thumb.dragging { transition: none; }
+        /* floating date tooltip above the thumb */
+        .chapter-thumb-label {
+            position: absolute;
+            bottom: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%);
             background: var(--border-color);
             color: white;
             font-size: 0.58rem;
-            padding: 0 4px;
-            border-radius: 2px;
+            font-weight: 900;
+            text-transform: uppercase;
+            white-space: nowrap;
+            padding: 2px 7px;
+            border-radius: 3px;
+            pointer-events: none;
+            letter-spacing: 0.04em;
         }
-        .chapter-btn.current .chapter-btn-num { background: white; color: var(--accent-red); }
+        .chapter-thumb-label::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 4px solid transparent;
+            border-top-color: var(--border-color);
+        }
 
         /* ── Messages ── */
         .timeline { width: 100%; max-width: 700px; display: none; }
@@ -587,8 +646,21 @@
 
             <div id="story-header" style="display:none;width:100%;max-width:700px;">
                 <div class="character-legend" id="character-legend"></div>
-                <!-- Improvement 3: chapter jump nav lives here -->
-                <div class="chapter-nav" id="chapter-nav"></div>
+                <!-- Improvement 3: date range slider -->
+                <div class="chapter-slider-wrap" id="chapter-slider-wrap" style="display:none">
+                    <div class="chapter-slider-inner">
+                        <span class="chapter-slider-end-label" id="slider-start-label"></span>
+                        <div class="chapter-slider-track-wrap" id="chapter-slider-track-wrap">
+                            <div class="chapter-slider-track">
+                                <div class="chapter-slider-fill" id="chapter-slider-fill"></div>
+                            </div>
+                            <div class="chapter-thumb" id="chapter-thumb">
+                                <div class="chapter-thumb-label" id="chapter-thumb-label"></div>
+                            </div>
+                        </div>
+                        <span class="chapter-slider-end-label" id="slider-end-label"></span>
+                    </div>
+                </div>
             </div>
 
             <div id="active-timeline-container" class="timeline"></div>
@@ -719,17 +791,67 @@
                  + contentPanel.scrollTop;
         }
 
+        /* ── Improvement 3: date range slider ── */
+        const sliderWrap       = document.getElementById('chapter-slider-wrap');
+        const sliderTrack      = document.getElementById('chapter-slider-track-wrap');
+        const sliderFill       = document.getElementById('chapter-slider-fill');
+        const sliderThumb      = document.getElementById('chapter-thumb');
+        const thumbLabel       = document.getElementById('chapter-thumb-label');
+        const sliderStartLabel = document.getElementById('slider-start-label');
+        const sliderEndLabel   = document.getElementById('slider-end-label');
+
+        let currentChapterIndex = 0;
+
+        // Map a chapter index to a 0-100 % position along the track.
+        // Uses each chapter's scroll offset so spacing reflects real time gaps,
+        // not just equal divisions.
+        function pctForIndex(i) {
+            if (chapters.length <= 1) return 0;
+            const first = scrollOffsetOf(chapters[0].msgEl || chapters[0].msgEl);
+            const last  = scrollOffsetOf(chapters[chapters.length - 1].msgEl);
+            const range = last - first;
+            if (range <= 0) return (i / (chapters.length - 1)) * 100;
+            return ((scrollOffsetOf(chapters[i].msgEl) - first) / range) * 100;
+        }
+
+        // Move thumb + fill to a given % without scrolling.
+        function setThumbPct(pct) {
+            sliderThumb.style.left = pct + '%';
+            sliderFill.style.width = pct + '%';
+        }
+
+        // Full state update: thumb position + tooltip text.
+        function setSliderToIndex(i) {
+            currentChapterIndex = i;
+            setThumbPct(pctForIndex(i));
+            thumbLabel.textContent = chapters[i] ? chapters[i].label : '';
+        }
+
+        function jumpToChapter(i) {
+            setSliderToIndex(i);
+            if (chapters[i] && chapters[i].msgEl)
+                chapters[i].msgEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Return the chapter index whose % position is nearest to pct.
+        function nearestChapter(pct) {
+            let best = 0, bestDist = Infinity;
+            chapters.forEach((_, i) => {
+                const d = Math.abs(pctForIndex(i) - pct);
+                if (d < bestDist) { bestDist = d; best = i; }
+            });
+            return best;
+        }
+
         function updateCurrentChapter(scrollTop) {
             if (!chapters.length) return;
             let current = 0;
             chapters.forEach((ch, i) => {
                 if (ch.msgEl && scrollOffsetOf(ch.msgEl) <= scrollTop + 120) current = i;
             });
-            document.querySelectorAll('.chapter-btn').forEach((btn, i) =>
-                btn.classList.toggle('current', i === current));
+            if (current !== currentChapterIndex) setSliderToIndex(current);
         }
 
-        /* ── Improvement 3: chapter tick marks ── */
         function renderChapterTicks() {
             progressContainer.querySelectorAll('.chapter-tick').forEach(t => t.remove());
             chapters.forEach(ch => {
@@ -742,15 +864,89 @@
             });
         }
 
+        function buildSlider() {
+            if (chapters.length <= 1) {
+                sliderWrap.style.display = 'none';
+                return;
+            }
+
+            // End labels
+            sliderStartLabel.textContent = chapters[0].label;
+            sliderEndLabel.textContent   = chapters[chapters.length - 1].label;
+
+            sliderWrap.style.display = 'block';
+            setSliderToIndex(0);
+            attachThumbDrag();
+        }
+
+        function attachThumbDrag() {
+            function clientXFromEvent(e) {
+                return e.touches ? e.touches[0].clientX
+                     : e.changedTouches ? e.changedTouches[0].clientX
+                     : e.clientX;
+            }
+
+            function pctFromClientX(clientX) {
+                const rect = sliderTrack.getBoundingClientRect();
+                return Math.max(0, Math.min(100, (clientX - rect.left) / rect.width * 100));
+            }
+
+            let dragging = false;
+
+            function onMove(e) {
+                if (!dragging) return;
+                e.preventDefault();
+                const pct = pctFromClientX(clientXFromEvent(e));
+                const idx = nearestChapter(pct);
+                // Thumb follows finger freely; tooltip shows nearest date
+                setThumbPct(pct);
+                thumbLabel.textContent = chapters[idx] ? chapters[idx].label : '';
+            }
+
+            function onUp(e) {
+                if (!dragging) return;
+                dragging = false;
+                sliderThumb.classList.remove('dragging');
+                const pct = pctFromClientX(clientXFromEvent(e));
+                jumpToChapter(nearestChapter(pct));
+                document.removeEventListener('mousemove', onMove);
+                document.removeEventListener('mouseup', onUp);
+                document.removeEventListener('touchmove', onMove);
+                document.removeEventListener('touchend', onUp);
+            }
+
+            sliderThumb.addEventListener('mousedown', e => {
+                e.preventDefault();
+                dragging = true;
+                sliderThumb.classList.add('dragging');
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onUp);
+            });
+
+            sliderThumb.addEventListener('touchstart', e => {
+                dragging = true;
+                sliderThumb.classList.add('dragging');
+                document.addEventListener('touchmove', onMove, { passive: false });
+                document.addEventListener('touchend', onUp);
+            }, { passive: true });
+
+            // Click anywhere on the track to jump
+            sliderTrack.addEventListener('click', e => {
+                if (e.target === sliderThumb || e.target === thumbLabel) return;
+                const pct = pctFromClientX(e.clientX);
+                jumpToChapter(nearestChapter(pct));
+            });
+        }
+
         function computeChapterPositions() {
             const total = contentPanel.scrollHeight - contentPanel.clientHeight;
             if (total <= 0) return;
             chapters.forEach(ch => {
-                // Tick should appear at the % of the scroll range where this
-                // chapter's first message reaches the top of the viewport.
                 ch.pct = ch.msgEl ? (scrollOffsetOf(ch.msgEl) / total) * 100 : 0;
             });
             renderChapterTicks();
+            // Refresh thumb position now that we have real scroll offsets
+            if (chapters.length > 1) setSliderToIndex(currentChapterIndex);
         }
 
         /* ── Filter ── */
@@ -934,7 +1130,6 @@
 
             const container  = document.getElementById('active-timeline-container');
             const legend     = document.getElementById('character-legend');
-            const chapterNav = document.getElementById('chapter-nav');
 
             // Clear before state reset (security fix #7)
             container.innerHTML = '';
@@ -1053,23 +1248,8 @@
             const allMsgEls = container.querySelectorAll('.message');
             chapters.forEach(ch => { ch.msgEl = allMsgEls[ch.startIndex] || null; });
 
-            /* ── Improvement 3: render chapter nav buttons ── */
-            chapterNav.innerHTML = '';
-            chapters.forEach((ch, i) => {
-                const btn = document.createElement('button');
-                btn.className = 'chapter-btn' + (i === 0 ? ' current' : '');
-
-                const numSpan = document.createElement('span');
-                numSpan.className   = 'chapter-btn-num';
-                numSpan.textContent = i + 1;
-
-                btn.appendChild(numSpan);
-                btn.appendChild(document.createTextNode('\u00a0' + ch.label));
-                btn.addEventListener('click', () => {
-                    if (ch.msgEl) ch.msgEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                });
-                chapterNav.appendChild(btn);
-            });
+            /* ── Improvement 3: build date slider ── */
+            buildSlider();
 
             contentPanel.scrollTo({ top: 0, behavior: 'instant' });
             progressBar.style.width = '0%';
