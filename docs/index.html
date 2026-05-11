@@ -1,1362 +1,1499 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comic Timeline</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comic Timeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.574.0/dist/umd/lucide.min.js"></script>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --panel: #ffffff;
+    --ink: #1b1f24;
+    --ink-soft: #4b5563;
+    --ink-mute: #8a93a0;
+    --line: #1b1f24;
+    --line-soft: #e3e6ea;
+    --rail: #f0f2f5;
 
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#ef4444">
-    <script defer src="https://umami-livid-five.vercel.app/script.js" data-website-id="787e55f0-dbbf-450a-958c-ae42d97c8004"></script>
+    /* terminal accents (calmer, light-dev palette) */
+    --accent: #e0594f;        /* keep red identity but softer */
+    --accent-2: #f4d35e;      /* soft yellow */
+    --term-green: #2a9d6a;
+    --term-blue: #3b82c4;
+    --term-purple: #7c5cd1;
+    --term-orange: #d68a3a;
+    --term-pink: #c75d8b;
 
-    <script src="https://unpkg.com/lucide@0.574.0/dist/umd/lucide.min.js"></script>
-    <script defer src="https://umami-livid-five.vercel.app/script.js" data-website-id="bd3b7ccc-dad0-4b04-98c5-96e26ebcd484"></script>
-    <style>
-        :root {
-            --bg-color: #fafaf9;
-            --text-color: #1a1a1a;
-            --card-bg: #ffffff;
-            --border-color: #000000;
-            --accent-red: #ef4444;
-            --comic-yellow: #ffde00;
-            --sidebar-width: 280px;
-            --comic-font: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive, sans-serif;
-        }
+    --shadow: 4px 4px 0 var(--line);
+    --shadow-sm: 2px 2px 0 var(--line);
+    --shadow-lg: 6px 6px 0 var(--line);
 
-        body, html {
-            height: 100%;
-            margin: 0;
-            font-family: var(--comic-font);
-            background: var(--bg-color);
-            color: var(--text-color);
-            overflow: hidden;
-        }
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --comic: 'Comic Neue', 'Comic Sans MS', system-ui, sans-serif;
 
-        /* ── Progress bar ── */
-        .progress-container {
-            position: sticky;
-            top: 0;
-            width: 100%;
-            height: 6px;
-            background: rgba(0,0,0,0.06);
-            z-index: 1000;
-        }
-        #read-progress {
-            height: 100%;
-            width: 0%;
-            background: var(--accent-red);
-            transition: width 0.1s ease-out;
-        }
-        /* Improvement 3: chapter tick marks */
-        .chapter-tick {
-            position: absolute;
-            top: 0;
-            width: 2px;
-            height: 100%;
-            background: var(--border-color);
-            opacity: 0.35;
-            transform: translateX(-50%);
-            pointer-events: none;
-        }
+    --sidebar-w: 300px;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
 
-        /* ── Layout ── */
-        .app-container {
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-        }
+  *, *::before, *::after { box-sizing: border-box; }
 
-        /* ── Sidebar ── */
-        .sidebar {
-            width: var(--sidebar-width);
-            min-width: var(--sidebar-width);
-            border-right: 4px solid var(--border-color);
-            overflow-y: auto;
-            padding: 16px;
-            background: var(--bg-color);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 900;
-            transition: transform 0.3s ease;
-        }
-        .sidebar-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding-bottom: 10px;
-            border-bottom: 3px solid var(--border-color);
-            flex-wrap: nowrap;
-            gap: 16px;
-            min-height: 40px;
-        }
-        .sidebar-header h2 {
-            margin: 0;
-            font-size: 1.1rem;
-            font-weight: 900;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            flex: 1 1 auto;
-            max-width: calc(100% - 60px);
-            line-height: 1.2;
-        }
-        #close-sidebar { flex: 0 0 auto; cursor: pointer; padding: 4px; }
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 14px;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
 
-        /* Improvement 1: richer story items */
-        .story-item {
-            padding: 10px 14px;
-            border: 3px solid var(--border-color);
-            border-radius: 4px;
-            background: var(--card-bg);
-            cursor: pointer;
-            font-weight: 900;
-            text-transform: uppercase;
-            transition: all 0.15s;
-            box-shadow: 3px 3px 0 var(--border-color);
-            font-size: 0.88rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .story-item:hover { transform: translate(2px,-2px); box-shadow: 5px 5px 0 var(--border-color); }
-        .story-item.active { background: var(--accent-red); color: white; transform: translate(2px,2px); box-shadow: 0 0 0; }
-        .story-item-title { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .story-meta { font-size: 0.68rem; font-weight: 400; text-transform: none; opacity: 0.6; white-space: nowrap; }
-        .story-item.active .story-meta { opacity: 0.75; }
-        .story-new-badge {
-            font-size: 0.6rem;
-            font-weight: 900;
-            padding: 1px 5px;
-            border: 2px solid var(--border-color);
-            border-radius: 3px;
-            background: var(--comic-yellow);
-            color: var(--border-color);
-            flex-shrink: 0;
-        }
-        .story-item.active .story-new-badge { background: white; color: var(--accent-red); border-color: white; }
+  /* ── App shell ── */
+  .app {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+  }
 
-        /* ── Content panel ── */
-        .content-panel {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 0 10px 40px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-image: radial-gradient(var(--border-color) 0.8px, transparent 0.8px);
-            background-size: 22px 22px;
-            scroll-behavior: smooth;
-        }
+  /* ── Sidebar ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    min-width: var(--sidebar-w);
+    background: var(--panel);
+    border-right: 2px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    z-index: 900;
+    transition: transform .25s ease;
+  }
+  .sidebar-head {
+    padding: 18px 18px 14px;
+    border-bottom: 2px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  .brand-mark {
+    width: 30px;
+    height: 30px;
+    border: 2px solid var(--line);
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    box-shadow: var(--shadow-sm);
+    font-family: var(--comic);
+    font-weight: 700;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .brand-name {
+    font-family: var(--comic);
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: .3px;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .brand-sub {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-mute);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+  .icon-btn {
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    color: var(--ink-soft);
+    display: grid;
+    place-items: center;
+  }
+  .icon-btn:hover { background: var(--rail); color: var(--ink); }
 
-        /* ── Character legend ── */
-        .character-legend {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 6px;
-            margin: 12px 0 8px;
-            padding: 8px;
-            width: 100%;
-            max-width: 700px;
-            border: 3px solid var(--border-color);
-            border-radius: 6px;
-            background: white;
-            box-shadow: 4px 4px 0 var(--border-color);
-        }
-        .legend-pill {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.68rem;
-            font-weight: 900;
-            background: #f8f8f8;
-            padding: 5px 10px;
-            border: 2px solid var(--border-color);
-            border-radius: 999px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-        .legend-pill:hover { transform: translateY(-1px); }
-        .legend-pill.filtering { color: white; transform: translateY(1px); }
-        /* Improvement 2: avatar initials in legend */
-        .legend-avatar {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.55rem;
-            font-weight: 900;
-            flex-shrink: 0;
-            border: 1.5px solid rgba(0,0,0,0.2);
-        }
+  .sidebar-search {
+    padding: 12px 14px;
+    border-bottom: 2px solid var(--line);
+  }
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--rail);
+    border: 1.5px solid var(--line-soft);
+    border-radius: var(--radius-sm);
+    padding: 7px 10px;
+    transition: border-color .15s;
+  }
+  .search-box:focus-within { border-color: var(--line); }
+  .search-box input {
+    background: transparent;
+    border: 0;
+    outline: 0;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink);
+    flex: 1;
+    min-width: 0;
+  }
+  .search-box .prefix { color: var(--accent); font-weight: 700; }
 
-        /* Improvement 3: date range slider */
-        .chapter-slider-wrap {
-            width: 100%;
-            max-width: 700px;
-            margin: 0 0 18px;
-            padding: 28px 16px 10px;
-            background: white;
-            border: 3px solid var(--border-color);
-            border-radius: 6px;
-            box-shadow: 4px 4px 0 var(--border-color);
-            box-sizing: border-box;
-            user-select: none;
-        }
-        .chapter-slider-inner {
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .chapter-slider-end-label {
-            font-size: 0.62rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            white-space: nowrap;
-            flex-shrink: 0;
-            opacity: 0.55;
-        }
-        .chapter-slider-track-wrap {
-            position: relative;
-            flex: 1;
-            height: 28px;
-            display: flex;
-            align-items: center;
-        }
-        .chapter-slider-track {
-            position: absolute;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: #e0e0e0;
-            border: 2px solid var(--border-color);
-            border-radius: 2px;
-        }
-        .chapter-slider-fill {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            background: var(--accent-red);
-            border-radius: 2px;
-            pointer-events: none;
-        }
-        .chapter-thumb {
-            position: absolute;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--accent-red);
-            border: 3px solid var(--border-color);
-            box-shadow: 3px 3px 0 var(--border-color);
-            cursor: grab;
-            z-index: 4;
-            transition: left 0.18s ease;
-        }
-        .chapter-thumb:active  { cursor: grabbing; box-shadow: 1px 1px 0 var(--border-color); }
-        .chapter-thumb.dragging { transition: none; }
-        /* floating date tooltip above the thumb */
-        .chapter-thumb-label {
-            position: absolute;
-            bottom: calc(100% + 6px);
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--border-color);
-            color: white;
-            font-size: 0.58rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            white-space: nowrap;
-            padding: 2px 7px;
-            border-radius: 3px;
-            pointer-events: none;
-            letter-spacing: 0.04em;
-        }
-        .chapter-thumb-label::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 4px solid transparent;
-            border-top-color: var(--border-color);
-        }
+  .story-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 12px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .story-list-label {
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    padding: 10px 4px 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .story-list-label::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--term-green);
+    box-shadow: 0 0 0 2px rgba(42,157,106,.18);
+  }
+  .story-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1.5px solid var(--line-soft);
+    border-radius: var(--radius-sm);
+    background: var(--panel);
+    cursor: pointer;
+    transition: transform .12s, box-shadow .12s, border-color .12s;
+    min-width: 0;
+  }
+  .story-item:hover {
+    border-color: var(--line);
+    transform: translate(-1px, -1px);
+    box-shadow: var(--shadow-sm);
+  }
+  .story-item.active {
+    border-color: var(--line);
+    background: #fff;
+    box-shadow: var(--shadow);
+    transform: translate(-2px, -2px);
+  }
+  .story-item.active .story-dot { background: var(--accent); }
+  .story-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ink-mute);
+    margin-top: 7px;
+    flex-shrink: 0;
+  }
+  .story-meta-col {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .story-title {
+    font-family: var(--comic);
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1.15;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .story-sub {
+    font-size: 10px;
+    color: var(--ink-mute);
+    display: flex;
+    gap: 8px;
+    letter-spacing: .04em;
+  }
+  .story-sub b { color: var(--ink-soft); font-weight: 600; }
+  .new-badge {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: var(--accent-2);
+    border: 1.5px solid var(--line);
+    color: var(--line);
+    letter-spacing: .08em;
+    align-self: flex-start;
+    margin-top: 4px;
+  }
 
-        /* ── Messages ── */
-        .timeline { width: 100%; max-width: 700px; display: none; }
-        .timeline.active { display: block; }
+  /* ── Content ── */
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background:
+      radial-gradient(circle at 1px 1px, rgba(27,31,36,.06) 1px, transparent 0) 0 0/22px 22px,
+      var(--bg);
+  }
 
-        .message {
-            display: flex;
-            flex-direction: column;
-            margin: 0 auto 28px;
-            position: relative;
-            width: 100%;
-            max-width: 700px;
-            transition: opacity 0.4s;
-        }
-        .timeline.is-filtering .message { opacity: 0.18; }
-        .timeline.is-filtering .message.highlight { opacity: 1; }
+  /* top bar */
+  .topbar {
+    height: 56px;
+    border-bottom: 2px solid var(--line);
+    background: var(--panel);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 16px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .topbar .crumb {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+  }
+  .crumb-prefix {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .crumb-path {
+    color: var(--ink-soft);
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .crumb-path b { color: var(--ink); font-weight: 700; }
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tb-btn {
+    height: 32px;
+    padding: 0 10px;
+    border: 1.5px solid var(--line-soft);
+    background: var(--panel);
+    border-radius: var(--radius-sm);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all .12s;
+  }
+  .tb-btn:hover {
+    border-color: var(--line);
+    color: var(--ink);
+    transform: translate(-1px, -1px);
+    box-shadow: var(--shadow-sm);
+  }
+  .tb-btn.primary {
+    background: var(--accent);
+    border-color: var(--line);
+    color: #fff;
+    box-shadow: var(--shadow-sm);
+  }
+  .tb-btn.primary:hover { box-shadow: var(--shadow); }
 
-        .dialog-date {
-            font-size: 0.68rem;
-            font-weight: 900;
-            letter-spacing: 1px;
-            color: var(--border-color);
-            text-transform: uppercase;
-            margin: 0 auto 6px;
-            border-bottom: 3px solid var(--border-color);
-            display: inline-block;
-            background: white;
-            padding: 0 10px;
-        }
-        .message-body { display: flex; align-items: flex-start; gap: 10px; width: 100%; }
-        .message.left  .message-body { flex-direction: row; }
-        .message.right .message-body { flex-direction: row-reverse; }
+  /* mobile menu trigger */
+  #menu-toggle { display: none; }
 
-        .dialog-number {
-            position: absolute;
-            top: 8px;
-            font-size: 0.58rem;
-            font-weight: 900;
-            background: var(--border-color);
-            color: white;
-            padding: 1px 6px;
-            border-radius: 3px;
-            z-index: 2;
-        }
-        .message.left  .dialog-number { left: 48px; }
-        .message.right .dialog-number { right: 48px; }
+  /* progress */
+  .progress-track {
+    position: relative;
+    height: 3px;
+    background: var(--line-soft);
+    flex-shrink: 0;
+  }
+  #read-progress {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    transition: width .1s ease-out;
+  }
+  .chapter-tick {
+    position: absolute;
+    top: 0;
+    width: 1px;
+    height: 100%;
+    background: var(--line);
+    opacity: .35;
+    transform: translateX(-50%);
+  }
 
-        /* Improvement 2: avatar with initials + character colour */
-        .avatar {
-            width: 48px;
-            height: 48px;
-            border: 3px solid var(--border-color);
-            border-radius: 50%;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            font-size: 0.9rem;
-        }
+  /* scroll body */
+  .scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 22px 24px 80px;
+    scroll-behavior: smooth;
+  }
 
-        .message-content {
-            max-width: 84%;
-            padding: 12px 16px;
-            border: 4px solid var(--border-color);
-            border-radius: 10px;
-            background: var(--card-bg);
-            box-shadow: 5px 5px 0 var(--border-color);
-            position: relative;
-            word-wrap: break-word;
-            line-height: 1.35;
-            margin-bottom: 12px;
-        }
-        /* Improvement 2: coloured side border */
-        .message.left  .message-content { border-left-width: 6px; }
-        .message.right .message-content { border-right-width: 6px; }
+  /* sticky tool header */
+  .tools {
+    max-width: 760px;
+    margin: 0 auto 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    padding: 10px 12px;
+    background: var(--panel);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+  }
+  .legend-label {
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-right: 4px;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 9px 4px 4px;
+    border: 1.5px solid var(--line-soft);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--panel);
+    color: var(--ink);
+    transition: all .12s;
+    user-select: none;
+  }
+  .pill:hover { border-color: var(--line); }
+  .pill .dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 8.5px;
+    font-weight: 800;
+    color: #fff;
+  }
+  .pill.filtering {
+    background: var(--ink);
+    color: #fff;
+    border-color: var(--ink);
+  }
 
-        .message-content::after {
-            content: '';
-            position: absolute;
-            top: 12px;
-            width: 0;
-            height: 0;
-            border: 10px solid transparent;
-        }
-        .message.left  .message-content::after { left: -22px; border-right-color: var(--border-color); }
-        .message.right .message-content::after { right: -22px; border-left-color: var(--border-color); }
+  /* slider */
+  .slider-card {
+    background: var(--panel);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+    padding: 18px 14px 12px;
+  }
+  .slider-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .slider-end {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--ink-mute);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .slider-trackw {
+    position: relative;
+    flex: 1;
+    height: 24px;
+    display: flex;
+    align-items: center;
+  }
+  .slider-track {
+    position: absolute;
+    left: 0; right: 0;
+    height: 3px;
+    background: var(--line-soft);
+    border-radius: 2px;
+  }
+  .slider-fill {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  .slider-thumb {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2.5px solid var(--accent);
+    box-shadow: var(--shadow-sm);
+    cursor: grab;
+    z-index: 2;
+    transition: left .18s ease;
+  }
+  .slider-thumb:active { cursor: grabbing; }
+  .slider-thumb.dragging { transition: none; }
+  .thumb-label {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    letter-spacing: .04em;
+  }
+  .thumb-label::after {
+    content: '';
+    position: absolute;
+    top: 100%; left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: var(--ink);
+  }
 
-        .username { font-weight: 900; font-size: 0.82rem; text-transform: uppercase; margin-bottom: 4px; }
+  /* timeline */
+  .timeline {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+    display: none;
+  }
+  .timeline.active { display: block; }
 
-        .share-btn {
-            position: absolute;
-            bottom: -18px;
-            right: 15px;
-            background: var(--comic-yellow);
-            color: #000;
-            border: 3px solid var(--border-color);
-            padding: 4px 12px;
-            font-family: var(--comic-font);
-            font-size: 0.7rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            box-shadow: 4px 4px 0 var(--border-color);
-            clip-path: polygon(0% 15%,15% 15%,15% 0%,85% 0%,85% 15%,100% 15%,100% 85%,85% 85%,85% 100%,15% 100%,15% 85%,0% 85%);
-            transition: all 0.1s ease-in-out;
-            z-index: 10;
-        }
-        .share-btn:hover  { background: #fff; transform: translate(-2px,-2px); box-shadow: 6px 6px 0 var(--border-color); }
-        .share-btn:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--border-color); }
-        .message.right .share-btn { right: auto; left: 15px; }
+  /* date divider */
+  .date-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 28px 0 14px;
+  }
+  .date-divider::before,
+  .date-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--line-soft);
+  }
+  .date-chip {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    padding: 4px 10px;
+    border: 1.5px solid var(--line-soft);
+    border-radius: 999px;
+    background: var(--panel);
+  }
+  .date-chip::before {
+    content: "//  ";
+    color: var(--accent);
+  }
 
-        /* ── Fixed buttons ── */
-        #menu-toggle, #install-btn, #kb-help-btn {
-            position: fixed;
-            top: 8px;
-            padding: 8px 12px;
-            background: var(--accent-red);
-            color: white;
-            border: 3px solid var(--border-color);
-            border-radius: 8px;
-            font-weight: 900;
-            cursor: pointer;
-            z-index: 1001;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            box-shadow: 3px 3px 0 var(--border-color);
-            transition: all 0.2s;
-            font-size: 0.92rem;
-            font-family: var(--comic-font);
-        }
-        #menu-toggle  { left: 8px; }
-        #install-btn  { right: 8px; display: none; }
-        #kb-help-btn  { right: 8px; background: var(--border-color); }
-        #menu-toggle:hover, #install-btn:hover, #kb-help-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 5px 5px 0 var(--border-color);
-        }
+  /* ── Message (terminal card) ── */
+  .message {
+    display: flex;
+    flex-direction: column;
+    margin: 0 0 18px;
+    transition: opacity .25s;
+    position: relative;
+  }
+  .timeline.is-filtering .message { opacity: .15; }
+  .timeline.is-filtering .message.highlight { opacity: 1; }
 
-        /* Improvement 6: keyboard shortcut overlay */
-        #kb-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.55);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-        }
-        #kb-overlay.visible { display: flex; }
-        .kb-modal {
-            background: white;
-            border: 4px solid var(--border-color);
-            border-radius: 10px;
-            padding: 20px 24px;
-            box-shadow: 7px 7px 0 var(--border-color);
-            max-width: 360px;
-            width: 90%;
-        }
-        .kb-modal h3 {
-            font-size: 1rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            margin: 0 0 14px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid var(--border-color);
-        }
-        .kb-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 7px 0;
-            font-size: 0.82rem;
-            border-bottom: 1px solid rgba(0,0,0,0.07);
-        }
-        kbd {
-            display: inline-block;
-            padding: 2px 7px;
-            border: 2px solid var(--border-color);
-            border-radius: 4px;
-            font-family: var(--comic-font);
-            font-size: 0.78rem;
-            font-weight: 900;
-            background: #f5f5f5;
-            box-shadow: 2px 2px 0 var(--border-color);
-        }
-        .kb-desc { color: #555; }
-        .kb-close {
-            margin-top: 14px;
-            width: 100%;
-            padding: 8px;
-            border: 3px solid var(--border-color);
-            border-radius: 6px;
-            background: var(--comic-yellow);
-            font-family: var(--comic-font);
-            font-size: 0.82rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            cursor: pointer;
-            box-shadow: 3px 3px 0 var(--border-color);
-        }
+  .msg-body {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .message.right .msg-body { flex-direction: row-reverse; }
 
-        /* Improvement 4: share disclosure modal */
-        #share-modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.55);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-        }
-        #share-modal.visible { display: flex; }
-        .share-modal-box {
-            background: white;
-            border: 4px solid var(--border-color);
-            border-radius: 10px;
-            padding: 20px 24px;
-            box-shadow: 7px 7px 0 var(--border-color);
-            max-width: 340px;
-            width: 90%;
-        }
-        .share-modal-box h3 { font-size: 1rem; font-weight: 900; text-transform: uppercase; margin: 0 0 10px; }
-        .share-modal-box p  { font-size: 0.82rem; line-height: 1.5; color: #444; margin: 0 0 16px; }
-        .share-modal-btns   { display: flex; gap: 8px; }
-        .share-modal-btns button {
-            flex: 1;
-            padding: 8px;
-            border: 3px solid var(--border-color);
-            border-radius: 6px;
-            font-family: var(--comic-font);
-            font-size: 0.8rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            cursor: pointer;
-            box-shadow: 3px 3px 0 var(--border-color);
-        }
-        #share-confirm { background: var(--comic-yellow); }
-        #share-cancel  { background: #f0f0f0; }
+  .avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    border: 2px solid var(--line);
+    background: var(--panel);
+    box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .02em;
+    margin-top: 4px;
+  }
 
-        /* ── Empty state ── */
-        #empty-state { text-align: center; margin-top: 18vh; padding: 0 16px; color: #444; }
+  .card {
+    flex: 1;
+    min-width: 0;
+    max-width: calc(100% - 50px);
+    background: var(--panel);
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    position: relative;
+  }
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--rail);
+    border-bottom: 1.5px solid var(--line-soft);
+    font-size: 11px;
+  }
+  .traffic {
+    display: flex;
+    gap: 5px;
+    margin-right: 4px;
+  }
+  .traffic span {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,.15);
+  }
+  .traffic span:nth-child(1) { background: #ed6a5e; }
+  .traffic span:nth-child(2) { background: #f4c150; }
+  .traffic span:nth-child(3) { background: #62c655; }
+  .card-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+  .card-title .at { color: var(--ink-mute); }
+  .card-title .user { color: var(--ink); font-weight: 700; }
+  .card-title .sep { color: var(--ink-mute); }
+  .card-title .ts { color: var(--ink-mute); font-weight: 500; }
+  .card-num {
+    font-size: 10px;
+    color: var(--ink-mute);
+    font-weight: 700;
+    letter-spacing: .05em;
+    padding: 2px 6px;
+    background: var(--panel);
+    border: 1.5px solid var(--line-soft);
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .card-body {
+    padding: 14px 16px 16px;
+    font-family: var(--mono);
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--ink);
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+  }
+  .card-body::before {
+    content: "$ ";
+    color: var(--accent);
+    font-weight: 700;
+    user-select: none;
+  }
+  .message.right .card-body::before {
+    content: "› ";
+    color: var(--term-blue);
+  }
 
-        /* Improvement 6: keyboard-focused message */
-        .message.kb-focused .message-content {
-            outline: 3px solid var(--accent-red);
-            outline-offset: 2px;
-        }
+  /* attachments */
+  .attach {
+    margin: 10px 16px 14px;
+    border: 1.5px solid var(--line-soft);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--rail);
+  }
+  .attach img, .attach video { width: 100%; display: block; }
+  .attach audio { width: 100%; display: block; }
+  .attach-yt {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+  }
+  .attach-yt iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
 
-        /* ── Responsive ── */
-        @media (max-width: 900px) {
-            .sidebar {
-                position: fixed;
-                inset: 0;
-                width: 100%;
-                min-width: unset;
-                transform: translateX(-100%);
-                padding: 12px 16px;
-                background: var(--bg-color);
-            }
-            .sidebar.open { transform: translateX(0); }
-            .sidebar-header h2 { font-size: 1rem; max-width: calc(100% - 70px); }
-            .sidebar-header { gap: 12px; padding: 0 0 10px 0; }
-            .content-panel { padding: 0 8px 50px; }
-            .message { margin: 0 auto 24px; }
-            .message-content { max-width: 88%; padding: 11px 14px; }
-            .avatar { width: 44px; height: 44px; }
-            .message.left  .dialog-number { left: 50px; }
-            .message.right .dialog-number { right: 50px; }
-            .dialog-date   { font-size: 0.66rem; padding: 0 10px; margin-bottom: 5px; }
-            .legend-pill   { padding: 5px 11px; font-size: 0.66rem; }
-            #menu-toggle, #install-btn, #kb-help-btn { top: 6px; padding: 7px 11px; }
-            #kb-help-btn { display: none; }
-        }
-    </style>
+  /* card footer / share */
+  .card-foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    padding: 8px 12px;
+    border-top: 1.5px solid var(--line-soft);
+    background: linear-gradient(to bottom, transparent, rgba(0,0,0,.01));
+  }
+  .share-btn {
+    background: var(--panel);
+    border: 1.5px solid var(--line-soft);
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 9px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all .12s;
+  }
+  .share-btn:hover {
+    border-color: var(--line);
+    color: var(--ink);
+    background: var(--accent-2);
+    transform: translate(-1px, -1px);
+    box-shadow: var(--shadow-sm);
+  }
+  .share-btn:disabled { opacity: .6; cursor: wait; }
+
+  /* author color tag on left edge */
+  .card::before {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 0;
+    width: 4px;
+    background: var(--char-color, var(--accent));
+  }
+  .message.right .card::before { left: auto; right: 0; }
+
+  /* empty state */
+  .empty {
+    max-width: 540px;
+    margin: 10vh auto 0;
+    padding: 28px;
+    text-align: center;
+    color: var(--ink-soft);
+  }
+  .empty .glyph {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    border: 2px solid var(--line);
+    border-radius: 14px;
+    background: var(--accent);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    box-shadow: var(--shadow);
+    font-family: var(--comic);
+    font-weight: 700;
+    font-size: 32px;
+  }
+  .empty h1 {
+    font-family: var(--comic);
+    font-weight: 700;
+    font-size: 28px;
+    margin: 0 0 6px;
+    color: var(--ink);
+  }
+  .empty p { font-size: 13px; margin: 4px 0; }
+  .empty .hint {
+    margin-top: 18px;
+    font-size: 11px;
+    color: var(--ink-mute);
+  }
+  .empty kbd {
+    background: var(--panel);
+    border: 1.5px solid var(--line);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 11px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* kb-focused outline */
+  .message.kb-focused .card {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* overlays */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(20,24,28,.55);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .overlay.visible { display: flex; }
+  .modal {
+    background: var(--panel);
+    border: 2px solid var(--line);
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    padding: 22px 22px 18px;
+    width: 100%;
+    max-width: 380px;
+  }
+  .modal h3 {
+    margin: 0 0 14px;
+    font-family: var(--comic);
+    font-weight: 700;
+    font-size: 18px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .modal h3 .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    background: rgba(224,89,79,.12);
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: .1em;
+  }
+  .kb-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    font-size: 12px;
+    border-bottom: 1px dashed var(--line-soft);
+  }
+  .kb-row:last-of-type { border-bottom: 0; }
+  .kb-row .keys { display: flex; gap: 4px; }
+  .kb-row .desc { color: var(--ink-soft); }
+  kbd.k {
+    display: inline-block;
+    padding: 2px 6px;
+    border: 1.5px solid var(--line);
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--rail);
+    box-shadow: var(--shadow-sm);
+  }
+  .modal-btns {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .modal-btn {
+    flex: 1;
+    padding: 9px;
+    border: 1.5px solid var(--line);
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--panel);
+    color: var(--ink);
+    transition: all .12s;
+  }
+  .modal-btn:hover { transform: translate(-1px,-1px); box-shadow: var(--shadow-sm); }
+  .modal-btn.primary { background: var(--accent); color: #fff; }
+
+  /* sidebar overlay backdrop for mobile */
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(20,24,28,.4);
+    z-index: 800;
+  }
+  .sidebar-backdrop.visible { display: block; }
+
+  /* responsive */
+  @media (max-width: 900px) {
+    #menu-toggle { display: inline-flex; }
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      transform: translateX(-100%);
+      box-shadow: var(--shadow-lg);
+    }
+    .sidebar.open { transform: translateX(0); }
+    .scroll { padding: 16px 14px 80px; }
+    .avatar { width: 34px; height: 34px; font-size: 11px; }
+    .card { max-width: calc(100% - 46px); }
+    .topbar { padding: 0 12px; }
+    .tb-btn .btn-label { display: none; }
+    .crumb-path { font-size: 12px; }
+  }
+
+  /* scrollbar */
+  .scroll::-webkit-scrollbar,
+  .story-list::-webkit-scrollbar { width: 10px; }
+  .scroll::-webkit-scrollbar-thumb,
+  .story-list::-webkit-scrollbar-thumb {
+    background: var(--line-soft);
+    border-radius: 6px;
+    border: 2px solid var(--bg);
+  }
+  .scroll::-webkit-scrollbar-thumb:hover,
+  .story-list::-webkit-scrollbar-thumb:hover { background: var(--ink-mute); }
+</style>
 </head>
 <body>
 
-    <button id="menu-toggle" aria-label="Open stories">
-        <i data-lucide="menu" width="24" height="24"></i>
-        Stories
-    </button>
-
-    <button id="install-btn" aria-label="Install app">
-        <i data-lucide="download" width="20" height="20"></i>
-        Install
-    </button>
-
-    <button id="kb-help-btn" aria-label="Keyboard shortcuts">
-        <i data-lucide="keyboard" width="18" height="18"></i>
-        ?
-    </button>
-
-    <!-- Improvement 6: keyboard shortcuts overlay -->
-    <div id="kb-overlay" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts">
-        <div class="kb-modal">
-            <h3>Keyboard shortcuts</h3>
-            <div class="kb-row">
-                <span><kbd>J</kbd> / <kbd>K</kbd></span>
-                <span class="kb-desc">Next / previous message</span>
-            </div>
-            <div class="kb-row">
-                <span><kbd>&larr;</kbd> / <kbd>&rarr;</kbd></span>
-                <span class="kb-desc">Previous / next story</span>
-            </div>
-            <div class="kb-row">
-                <span><kbd>F</kbd></span>
-                <span class="kb-desc">Filter by focused character</span>
-            </div>
-            <div class="kb-row">
-                <span><kbd>Esc</kbd></span>
-                <span class="kb-desc">Clear filter / close sidebar</span>
-            </div>
-            <div class="kb-row">
-                <span><kbd>?</kbd></span>
-                <span class="kb-desc">Show / hide this panel</span>
-            </div>
-            <button class="kb-close" id="kb-close-btn">Close</button>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <div class="brand">
+        <div class="brand-mark">~</div>
+        <div>
+          <div class="brand-name">Comic Timeline</div>
+          <div class="brand-sub">v2.0 · light</div>
         </div>
+      </div>
+      <button class="icon-btn" id="close-sidebar" aria-label="Close sidebar">
+        <i data-lucide="x" width="20" height="20"></i>
+      </button>
+    </div>
+    <div class="sidebar-search">
+      <div class="search-box">
+        <span class="prefix">/</span>
+        <input id="story-search" type="text" placeholder="search stories…" autocomplete="off">
+        <i data-lucide="search" width="14" height="14" style="color:var(--ink-mute);"></i>
+      </div>
+    </div>
+    <div class="story-list" id="story-list">
+      <div class="story-list-label">Active threads</div>
+    </div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+  <!-- Main -->
+  <main class="content">
+    <div class="topbar">
+      <button class="tb-btn" id="menu-toggle" aria-label="Open stories">
+        <i data-lucide="menu" width="16" height="16"></i>
+      </button>
+      <div class="crumb">
+        <span class="crumb-prefix">~/</span>
+        <span class="crumb-path" id="crumb-path">timeline · <b>select a story</b></span>
+      </div>
+      <div class="topbar-actions">
+        <button class="tb-btn" id="install-btn" style="display:none;">
+          <i data-lucide="download" width="14" height="14"></i>
+          <span class="btn-label">Install</span>
+        </button>
+        <button class="tb-btn" id="kb-help-btn" aria-label="Keyboard shortcuts">
+          <i data-lucide="command" width="14" height="14"></i>
+          <span class="btn-label">Shortcuts</span>
+        </button>
+      </div>
     </div>
 
-    <!-- Improvement 4: share disclosure modal -->
-    <div id="share-modal" role="dialog" aria-modal="true" aria-label="Share privacy notice">
-        <div class="share-modal-box">
-            <h3>Before you share</h3>
-            <p>Sharing sends this message to a third-party service to generate a shareable link. Your data is not stored beyond link creation. This notice won't appear again.</p>
-            <div class="share-modal-btns">
-                <button id="share-confirm">Got it, share!</button>
-                <button id="share-cancel">Cancel</button>
-            </div>
-        </div>
+    <div class="progress-track" id="progress-track">
+      <div id="read-progress"></div>
     </div>
 
-    <div class="app-container">
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <h2>COMIC TIMELINE</h2>
-                <i data-lucide="x" id="close-sidebar" width="28" height="28" style="cursor:pointer;" aria-label="Close sidebar"></i>
-            </div>
-        </div>
+    <div class="scroll" id="scroll">
+      <!-- empty state -->
+      <div class="empty" id="empty-state">
+        <div class="glyph">!?</div>
+        <h1>Pick a story to read</h1>
+        <p>Conversations rendered as terminal cards, one panel at a time.</p>
+        <p class="hint">Press <kbd>?</kbd> for shortcuts · <kbd>/</kbd> to search</p>
+      </div>
 
-        <div class="content-panel" id="content-panel">
-            <div class="progress-container" id="progress-container">
-                <div id="read-progress"></div>
-            </div>
-
-            <div id="empty-state">
-                <h1>COMIC <span style="color:var(--accent-red);">TIMELINE</span></h1>
-                <p>Select a story to begin reading</p>
-                <p style="margin-top:8px;font-size:0.78rem;opacity:0.5;">Press <kbd>?</kbd> for keyboard shortcuts</p>
-            </div>
-
-            <div id="story-header" style="display:none;width:100%;max-width:700px;">
-                <div class="character-legend" id="character-legend"></div>
-                <!-- Improvement 3: date range slider -->
-                <div class="chapter-slider-wrap" id="chapter-slider-wrap" style="display:none">
-                    <div class="chapter-slider-inner">
-                        <span class="chapter-slider-end-label" id="slider-start-label"></span>
-                        <div class="chapter-slider-track-wrap" id="chapter-slider-track-wrap">
-                            <div class="chapter-slider-track">
-                                <div class="chapter-slider-fill" id="chapter-slider-fill"></div>
-                            </div>
-                            <div class="chapter-thumb" id="chapter-thumb">
-                                <div class="chapter-thumb-label" id="chapter-thumb-label"></div>
-                            </div>
-                        </div>
-                        <span class="chapter-slider-end-label" id="slider-end-label"></span>
-                    </div>
+      <div id="story-header" style="display:none;">
+        <div class="tools">
+          <div class="legend" id="legend"></div>
+          <div class="slider-card" id="slider-card" style="display:none;">
+            <div class="slider-inner">
+              <span class="slider-end" id="slider-start"></span>
+              <div class="slider-trackw" id="slider-trackw">
+                <div class="slider-track">
+                  <div class="slider-fill" id="slider-fill"></div>
                 </div>
+                <div class="slider-thumb" id="slider-thumb">
+                  <div class="thumb-label" id="thumb-label"></div>
+                </div>
+              </div>
+              <span class="slider-end" id="slider-end"></span>
             </div>
-
-            <div id="active-timeline-container" class="timeline"></div>
+          </div>
         </div>
+      </div>
+
+      <div class="timeline" id="timeline"></div>
     </div>
-
-    <script>
-        lucide.createIcons();
-
-        /* ── State ── */
-        let storiesData     = [];
-        let currentMessages = [];
-        let activeFilter    = null;
-        let currentStory    = -1;
-        let kbFocusIndex    = -1;
-        let chapters        = []; // [{label, startIndex, msgEl, pct}]
-
-        /* ── DOM refs ── */
-        const contentPanel      = document.getElementById('content-panel');
-        const sidebar           = document.getElementById('sidebar');
-        const progressBar       = document.getElementById('read-progress');
-        const progressContainer = document.getElementById('progress-container');
-        const menuToggle        = document.getElementById('menu-toggle');
-        const closeSidebarEl    = document.getElementById('close-sidebar');
-        const installBtn        = document.getElementById('install-btn');
-        const kbOverlay         = document.getElementById('kb-overlay');
-        const shareModal        = document.getElementById('share-modal');
-
-        let deferredPrompt  = null;
-        let pendingShareBtn = null;
-        let pendingShareMsg = null;
-
-        /* ── Improvement 2: character colour palette ── */
-        const CHAR_COLORS = [
-            { bg: '#FAEEDA', text: '#633806', border: '#BA7517' }, // amber
-            { bg: '#E1F5EE', text: '#085041', border: '#1D9E75' }, // teal
-            { bg: '#EEEDFE', text: '#26215C', border: '#7F77DD' }, // purple
-            { bg: '#FAECE7', text: '#4A1B0C', border: '#D85A30' }, // coral
-            { bg: '#FBEAF0', text: '#4B1528', border: '#D4537E' }, // pink
-            { bg: '#E6F1FB', text: '#042C53', border: '#378ADD' }, // blue
-        ];
-
-        const charColorCache = new Map();
-
-        function hashName(name) {
-            let h = 0;
-            for (let i = 0; i < name.length; i++) h = (Math.imul(31, h) + name.charCodeAt(i)) | 0;
-            return Math.abs(h);
-        }
-
-        function getCharColor(username) {
-            if (!username) return CHAR_COLORS[0];
-            if (!charColorCache.has(username)) {
-                charColorCache.set(username, CHAR_COLORS[hashName(username) % CHAR_COLORS.length]);
-            }
-            return charColorCache.get(username);
-        }
-
-        function getInitials(username) {
-            if (!username) return '?';
-            return username.trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
-        }
-
-        /* ── Security helpers ── */
-        function sanitizeHTML(str) {
-            const div = document.createElement('div');
-            div.textContent = String(str ?? '');
-            return div.innerHTML;
-        }
-
-        function safeURL(url) {
-            if (typeof url !== 'string') return null;
-            return /^https?:\/\//i.test(url.trim()) ? url.trim() : null;
-        }
-
-        /* ── Sidebar helpers ── */
-        function openSidebar() {
-            sidebar.classList.add('open');
-            menuToggle.style.display = 'none';
-        }
-        function closeSidebar() {
-            sidebar.classList.remove('open');
-            menuToggle.style.display = 'flex';
-        }
-
-        menuToggle.addEventListener('click', () =>
-            sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
-        closeSidebarEl.addEventListener('click', closeSidebar);
-
-        /* ── Improvement 5: swipe gesture ── */
-        let touchStartX = 0, touchStartY = 0;
-
-        contentPanel.addEventListener('touchstart', e => {
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-        }, { passive: true });
-
-        contentPanel.addEventListener('touchend', e => {
-            const dx = e.changedTouches[0].clientX - touchStartX;
-            const dy = e.changedTouches[0].clientY - touchStartY;
-            if (Math.abs(dx) > Math.abs(dy) * 1.5 && dx > 60 && touchStartX < 32) openSidebar();
-        }, { passive: true });
-
-        sidebar.addEventListener('touchstart', e => {
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-        }, { passive: true });
-
-        sidebar.addEventListener('touchend', e => {
-            const dx = e.changedTouches[0].clientX - touchStartX;
-            const dy = e.changedTouches[0].clientY - touchStartY;
-            if (Math.abs(dx) > Math.abs(dy) * 1.5 && dx < -60) closeSidebar();
-        }, { passive: true });
-
-        /* ── Progress + chapter update on scroll ── */
-        contentPanel.addEventListener('scroll', () => {
-            const h = contentPanel.scrollHeight - contentPanel.clientHeight;
-            progressBar.style.width = h > 0 ? (contentPanel.scrollTop / h) * 100 + '%' : '0%';
-            updateCurrentChapter(contentPanel.scrollTop);
-        }, { passive: true });
-
-        // Returns how far an element is from the top of the scroll container's
-        // scrollable content — i.e. the scrollTop value at which it would sit
-        // at the very top of the viewport.
-        function scrollOffsetOf(el) {
-            return el.getBoundingClientRect().top
-                 - contentPanel.getBoundingClientRect().top
-                 + contentPanel.scrollTop;
-        }
-
-        /* ── Improvement 3: date range slider ── */
-        const sliderWrap       = document.getElementById('chapter-slider-wrap');
-        const sliderTrack      = document.getElementById('chapter-slider-track-wrap');
-        const sliderFill       = document.getElementById('chapter-slider-fill');
-        const sliderThumb      = document.getElementById('chapter-thumb');
-        const thumbLabel       = document.getElementById('chapter-thumb-label');
-        const sliderStartLabel = document.getElementById('slider-start-label');
-        const sliderEndLabel   = document.getElementById('slider-end-label');
-
-        let currentChapterIndex = 0;
-
-        // Map a chapter index to a 0-100 % position along the track.
-        // Uses each chapter's scroll offset so spacing reflects real time gaps,
-        // not just equal divisions.
-        function pctForIndex(i) {
-            if (chapters.length <= 1) return 0;
-            const first = scrollOffsetOf(chapters[0].msgEl || chapters[0].msgEl);
-            const last  = scrollOffsetOf(chapters[chapters.length - 1].msgEl);
-            const range = last - first;
-            if (range <= 0) return (i / (chapters.length - 1)) * 100;
-            return ((scrollOffsetOf(chapters[i].msgEl) - first) / range) * 100;
-        }
-
-        // Move thumb + fill to a given % without scrolling.
-        function setThumbPct(pct) {
-            sliderThumb.style.left = pct + '%';
-            sliderFill.style.width = pct + '%';
-        }
-
-        // Full state update: thumb position + tooltip text.
-        function setSliderToIndex(i) {
-            currentChapterIndex = i;
-            setThumbPct(pctForIndex(i));
-            thumbLabel.textContent = chapters[i] ? chapters[i].label : '';
-        }
-
-        function jumpToChapter(i) {
-            setSliderToIndex(i);
-            if (chapters[i] && chapters[i].msgEl)
-                chapters[i].msgEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        // Return the chapter index whose % position is nearest to pct.
-        function nearestChapter(pct) {
-            let best = 0, bestDist = Infinity;
-            chapters.forEach((_, i) => {
-                const d = Math.abs(pctForIndex(i) - pct);
-                if (d < bestDist) { bestDist = d; best = i; }
-            });
-            return best;
-        }
-
-        function updateCurrentChapter(scrollTop) {
-            if (!chapters.length) return;
-            let current = 0;
-            chapters.forEach((ch, i) => {
-                if (ch.msgEl && scrollOffsetOf(ch.msgEl) <= scrollTop + 120) current = i;
-            });
-            if (current !== currentChapterIndex) setSliderToIndex(current);
-        }
-
-        function renderChapterTicks() {
-            progressContainer.querySelectorAll('.chapter-tick').forEach(t => t.remove());
-            chapters.forEach(ch => {
-                if (ch.pct > 0 && ch.pct < 100) {
-                    const tick = document.createElement('div');
-                    tick.className = 'chapter-tick';
-                    tick.style.left = ch.pct + '%';
-                    progressContainer.appendChild(tick);
-                }
-            });
-        }
-
-        function buildSlider() {
-            if (chapters.length <= 1) {
-                sliderWrap.style.display = 'none';
-                return;
-            }
-
-            // End labels
-            sliderStartLabel.textContent = chapters[0].label;
-            sliderEndLabel.textContent   = chapters[chapters.length - 1].label;
-
-            sliderWrap.style.display = 'block';
-            setSliderToIndex(0);
-            attachThumbDrag();
-        }
-
-        function attachThumbDrag() {
-            function clientXFromEvent(e) {
-                return e.touches ? e.touches[0].clientX
-                     : e.changedTouches ? e.changedTouches[0].clientX
-                     : e.clientX;
-            }
-
-            function pctFromClientX(clientX) {
-                const rect = sliderTrack.getBoundingClientRect();
-                return Math.max(0, Math.min(100, (clientX - rect.left) / rect.width * 100));
-            }
-
-            let dragging = false;
-
-            function onMove(e) {
-                if (!dragging) return;
-                e.preventDefault();
-                const pct = pctFromClientX(clientXFromEvent(e));
-                const idx = nearestChapter(pct);
-                // Thumb follows finger freely; tooltip shows nearest date
-                setThumbPct(pct);
-                thumbLabel.textContent = chapters[idx] ? chapters[idx].label : '';
-            }
-
-            function onUp(e) {
-                if (!dragging) return;
-                dragging = false;
-                sliderThumb.classList.remove('dragging');
-                const pct = pctFromClientX(clientXFromEvent(e));
-                jumpToChapter(nearestChapter(pct));
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup', onUp);
-                document.removeEventListener('touchmove', onMove);
-                document.removeEventListener('touchend', onUp);
-            }
-
-            sliderThumb.addEventListener('mousedown', e => {
-                e.preventDefault();
-                dragging = true;
-                sliderThumb.classList.add('dragging');
-                document.addEventListener('mousemove', onMove);
-                document.addEventListener('mouseup', onUp);
-            });
-
-            sliderThumb.addEventListener('touchstart', e => {
-                dragging = true;
-                sliderThumb.classList.add('dragging');
-                document.addEventListener('touchmove', onMove, { passive: false });
-                document.addEventListener('touchend', onUp);
-            }, { passive: true });
-
-            // Click anywhere on the track to jump
-            sliderTrack.addEventListener('click', e => {
-                if (e.target === sliderThumb || e.target === thumbLabel) return;
-                const pct = pctFromClientX(e.clientX);
-                jumpToChapter(nearestChapter(pct));
-            });
-        }
-
-        function computeChapterPositions() {
-            const total = contentPanel.scrollHeight - contentPanel.clientHeight;
-            if (total <= 0) return;
-            chapters.forEach(ch => {
-                ch.pct = ch.msgEl ? (scrollOffsetOf(ch.msgEl) / total) * 100 : 0;
-            });
-            renderChapterTicks();
-            // Refresh thumb position now that we have real scroll offsets
-            if (chapters.length > 1) setSliderToIndex(currentChapterIndex);
-        }
-
-        /* ── Filter ── */
-        function toggleFilter(username) {
-            const container = document.getElementById('active-timeline-container');
-            if (activeFilter === username) {
-                activeFilter = null;
-                container.classList.remove('is-filtering');
-                document.querySelectorAll('.legend-pill').forEach(p => {
-                    p.classList.remove('filtering');
-                    p.style.background = '';
-                    p.style.borderColor = '';
-                });
-            } else {
-                activeFilter = username;
-                container.classList.add('is-filtering');
-                const color = getCharColor(username);
-                document.querySelectorAll('.legend-pill').forEach(p => {
-                    const match = p.dataset.user === username;
-                    p.classList.toggle('filtering', match);
-                    p.style.background  = match ? color.border : '';
-                    p.style.borderColor = match ? color.border : '';
-                });
-                container.querySelectorAll('.message').forEach(msg =>
-                    msg.classList.toggle('highlight', msg.dataset.author === username));
-            }
-        }
-
-        /* ── Attachment renderer ── */
-        function createAttachmentHTML(attach) {
-            if (!attach || typeof attach.type !== 'string' || typeof attach.url !== 'string') return '';
-            const url = safeURL(attach.url);
-            if (!url) { console.warn('Attachment URL rejected:', attach.url); return ''; }
-            const type = attach.type.toLowerCase();
-            const wrap = 'margin-top:10px;border:3px solid var(--border-color);border-radius:8px;overflow:hidden;';
-
-            if (type === 'video') return `<div style="${wrap}"><video controls style="width:100%;display:block;" src="${url}"></video></div>`;
-            if (type === 'image') return `<div style="${wrap}"><img src="${url}" style="width:100%;display:block;" loading="lazy" decoding="async"></div>`;
-            if (type === 'audio') return `<div style="margin-top:10px;"><audio controls style="width:100%;" src="${url}"></audio></div>`;
-
-            if (type === 'youtube') {
-                const m = url.match(/(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-                const vid = m ? m[1] : null;
-                if (!vid) return `<div style="margin-top:10px;padding:12px;background:#fff;"><a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent-red);font-weight:900;">Watch on YouTube</a></div>`;
-                return `<div style="${wrap}position:relative;padding-bottom:56.25%;height:0;"><iframe style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" src="https://www.youtube.com/embed/${vid}" frameborder="0" allowfullscreen allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"></iframe></div>`;
-            }
-
-            console.warn('Unknown attachment type:', type);
-            return '';
-        }
-
-        /* ── Improvement 4: share with one-time disclosure ── */
-        const SHARE_CONSENT_KEY  = 'comic_share_consented';
-        let shareConsentGiven    = localStorage.getItem(SHARE_CONSENT_KEY) === '1';
-
-        function handleShareClick(btn, msgIndex) {
-            const m = currentMessages[msgIndex];
-            if (!m) return;
-            if (shareConsentGiven) { doShare(btn, m); return; }
-            pendingShareBtn = btn;
-            pendingShareMsg = m;
-            shareModal.classList.add('visible');
-        }
-
-        document.getElementById('share-confirm').addEventListener('click', () => {
-            shareConsentGiven = true;
-            localStorage.setItem(SHARE_CONSENT_KEY, '1');
-            shareModal.classList.remove('visible');
-            if (pendingShareBtn && pendingShareMsg) {
-                doShare(pendingShareBtn, pendingShareMsg);
-                pendingShareBtn = pendingShareMsg = null;
-            }
-        });
-
-        document.getElementById('share-cancel').addEventListener('click', () => {
-            shareModal.classList.remove('visible');
-            pendingShareBtn = pendingShareMsg = null;
-        });
-
-        async function doShare(btn, m) {
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML  = 'Wait...';
-            btn.disabled   = true;
-            try {
-                const res  = await fetch('https://content-sharer-ten.vercel.app/api/share', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        text:       m.text,
-                        sender:     (m.sender === 'me' || m.sender === 'right') ? 'right' : 'left',
-                        timestamp:  m.timestamp || new Date().toLocaleString(),
-                        username:   m.username  || 'User',
-                        photoUrl:   `https://via.placeholder.com/40?text=${encodeURIComponent(m.username || 'User')}`,
-                        attachment: m.attachment
-                    })
-                });
-                const data = await res.json();
-                if (data.success && data.link) {
-                    await navigator.clipboard.writeText(data.link);
-                    btn.style.background = '#4ade80';
-                    btn.innerHTML = '<i data-lucide="check" width="14" height="14"></i> COPIED!';
-                    lucide.createIcons({ nodes: [btn] });
-                } else { throw new Error('Share API failed'); }
-            } catch (err) {
-                console.error('Share failed', err);
-                btn.innerHTML = 'ERROR!';
-            } finally {
-                setTimeout(() => {
-                    btn.innerHTML = originalHTML;
-                    btn.style.background = '';
-                    btn.disabled = false;
-                    lucide.createIcons({ nodes: [btn] });
-                }, 3000);
-            }
-        }
-
-        /* ── Improvement 6: keyboard overlay ── */
-        function openKbOverlay()  { kbOverlay.classList.add('visible'); }
-        function closeKbOverlay() { kbOverlay.classList.remove('visible'); }
-
-        document.getElementById('kb-help-btn').addEventListener('click', openKbOverlay);
-        document.getElementById('kb-close-btn').addEventListener('click', closeKbOverlay);
-        kbOverlay.addEventListener('click', e => { if (e.target === kbOverlay) closeKbOverlay(); });
-
-        /* ── Improvement 6: keyboard navigation ── */
-        function getMessageEls() {
-            return Array.from(document.querySelectorAll('#active-timeline-container .message'));
-        }
-
-        function setKbFocus(index) {
-            const msgs = getMessageEls();
-            if (!msgs.length) return;
-            index = Math.max(0, Math.min(msgs.length - 1, index));
-            msgs.forEach((m, i) => m.classList.toggle('kb-focused', i === index));
-            kbFocusIndex = index;
-            msgs[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-
-        document.addEventListener('keydown', e => {
-            if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
-
-            const anyOverlay = kbOverlay.classList.contains('visible') ||
-                               shareModal.classList.contains('visible');
-
-            if (e.key === '?' || e.key === '/') {
-                e.preventDefault();
-                anyOverlay ? closeKbOverlay() : openKbOverlay();
-                return;
-            }
-            if (e.key === 'Escape') {
-                if (kbOverlay.classList.contains('visible'))  { closeKbOverlay(); return; }
-                if (shareModal.classList.contains('visible')) { shareModal.classList.remove('visible'); return; }
-                if (sidebar.classList.contains('open'))       { closeSidebar(); return; }
-                if (activeFilter)                             { toggleFilter(activeFilter); return; }
-                return;
-            }
-            if (anyOverlay) return;
-
-            if (e.key === 'j' || e.key === 'J') { e.preventDefault(); setKbFocus(kbFocusIndex + 1); }
-            if (e.key === 'k' || e.key === 'K') { e.preventDefault(); setKbFocus(kbFocusIndex - 1); }
-
-            if (e.key === 'ArrowRight' && currentStory < storiesData.length - 1) {
-                e.preventDefault(); loadStory(currentStory + 1);
-            }
-            if (e.key === 'ArrowLeft' && currentStory > 0) {
-                e.preventDefault(); loadStory(currentStory - 1);
-            }
-            if ((e.key === 'f' || e.key === 'F') && kbFocusIndex >= 0) {
-                const msgs = getMessageEls();
-                const focused = msgs[kbFocusIndex];
-                if (focused) toggleFilter(focused.dataset.author);
-            }
-        });
-
-        /* ── Load story ── */
-        function loadStory(index) {
-            const story     = storiesData[index];
-            currentMessages = story.messages;
-            currentStory    = index;
-            kbFocusIndex    = -1;
-
-            const container  = document.getElementById('active-timeline-container');
-            const legend     = document.getElementById('character-legend');
-
-            // Clear before state reset (security fix #7)
-            container.innerHTML = '';
-            activeFilter = null;
-            container.classList.remove('is-filtering');
-
-            document.getElementById('empty-state').style.display  = 'none';
-            document.getElementById('story-header').style.display = 'block';
-            container.classList.add('active');
-            charColorCache.clear();
-
-            // Improvement 5: restore menu toggle on mobile
-            if (window.innerWidth <= 900) closeSidebar();
-
-            document.querySelectorAll('.story-item').forEach((el, idx) =>
-                el.classList.toggle('active', idx === index));
-
-            /* ── Improvement 2: build legend with character colours ── */
-            legend.innerHTML = '';
-            const charMap = new Map();
-            story.messages.forEach(m => {
-                if (m.username && !charMap.has(m.username)) charMap.set(m.username, true);
-            });
-
-            charMap.forEach((_, name) => {
-                const color = getCharColor(name);
-                const pill  = document.createElement('div');
-                pill.className    = 'legend-pill';
-                pill.dataset.user = name;
-                pill.style.borderColor = color.border;
-
-                const avatar = document.createElement('div');
-                avatar.className   = 'legend-avatar';
-                avatar.style.background = color.bg;
-                avatar.style.color      = color.text;
-                avatar.textContent      = getInitials(name);
-
-                const label = document.createElement('span');
-                label.textContent = name;
-
-                pill.appendChild(avatar);
-                pill.appendChild(label);
-                pill.addEventListener('click', () => toggleFilter(name));
-                legend.appendChild(pill);
-            });
-
-            /* ── Improvement 3: group messages into chapters by date ── */
-            chapters = [];
-            const datesSeen = new Map();
-            story.messages.forEach((m, i) => {
-                const raw   = m.timestamp || '';
-                // Use the first space-delimited token as the date key; fall back to 'Start'
-                const label = raw.trim().split(/[\s,T]/)[0] || 'Start';
-                if (!datesSeen.has(label)) {
-                    datesSeen.set(label, i);
-                    chapters.push({ label, startIndex: i, msgEl: null, pct: 0 });
-                }
-            });
-
-            /* ── Build message elements ── */
-            const fragment = document.createDocumentFragment();
-
-            story.messages.forEach((m, i) => {
-                const sideClass = (m.sender === 'right' || m.sender === 'me') ? 'right' : 'left';
-                const color     = getCharColor(m.username);
-
-                const msgDiv = document.createElement('div');
-                msgDiv.className      = `message ${sideClass}`;
-                msgDiv.dataset.author = m.username || 'Unknown';
-
-                msgDiv.innerHTML = `
-                    <div class="dialog-date"></div>
-                    <div class="message-body">
-                        <div class="dialog-number">#${i + 1}</div>
-                        <div class="avatar"></div>
-                        <div class="message-content">
-                            <div class="username"></div>
-                            <div class="message-text" style="font-size:0.96rem;line-height:1.35;padding-bottom:15px;"></div>
-                            ${createAttachmentHTML(m.attachment)}
-                            <button class="share-btn">
-                                <i data-lucide="zap" width="14" height="14"></i>
-                                SHARE!
-                            </button>
-                        </div>
-                    </div>
-                `;
-
-                // Safe text assignment (security fix #1)
-                msgDiv.querySelector('.dialog-date').textContent  = m.timestamp || 'Story start';
-                msgDiv.querySelector('.username').textContent     = m.username  || 'Unknown';
-                msgDiv.querySelector('.message-text').textContent = m.text      || '';
-
-                // Improvement 2: apply character colour
-                const avatarEl  = msgDiv.querySelector('.avatar');
-                avatarEl.textContent      = getInitials(m.username);
-                avatarEl.style.background = color.bg;
-                avatarEl.style.color      = color.text;
-                avatarEl.style.borderColor = color.border;
-
-                msgDiv.querySelector('.username').style.color = color.border;
-
-                const contentEl = msgDiv.querySelector('.message-content');
-                if (sideClass === 'left')  contentEl.style.borderLeftColor  = color.border;
-                if (sideClass === 'right') contentEl.style.borderRightColor = color.border;
-
-                // Share button (via addEventListener — security fix)
-                const shareBtn = msgDiv.querySelector('.share-btn');
-                shareBtn.addEventListener('click', () => handleShareClick(shareBtn, i));
-
-                fragment.appendChild(msgDiv);
-            });
-
-            container.appendChild(fragment);
-
-            // Wire chapter msgEl references now that elements are in the DOM
-            const allMsgEls = container.querySelectorAll('.message');
-            chapters.forEach(ch => { ch.msgEl = allMsgEls[ch.startIndex] || null; });
-
-            /* ── Improvement 3: build date slider ── */
-            buildSlider();
-
-            contentPanel.scrollTo({ top: 0, behavior: 'instant' });
-            progressBar.style.width = '0%';
-
-            lucide.createIcons({ nodes: Array.from(container.querySelectorAll('[data-lucide]')) });
-
-            // Compute tick positions after layout settles
-            requestAnimationFrame(() => requestAnimationFrame(computeChapterPositions));
-        }
-
-        /* ── Init: load stories with metadata (Improvement 1) ── */
-        async function init() {
-            try {
-                const res = await fetch('https://static-conf.vercel.app/go/this-and-that', {
-                    headers: { 'Accept': 'application/json; charset=utf-8' }
-                });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-                storiesData = JSON.parse(await res.text());
-
-                // Track seen stories for NEW badge
-                const SEEN_KEY  = 'comic_seen_stories';
-                const seenStore = JSON.parse(localStorage.getItem(SEEN_KEY) || '{}');
-
-                storiesData.forEach((story, index) => {
-                    const storyId  = story.id || story.name || index;
-                    const msgCount = (story.messages || []).length;
-                    const charSet  = new Set((story.messages || []).map(m => m.username).filter(Boolean));
-                    const isNew    = !seenStore[storyId];
-
-                    const div = document.createElement('div');
-                    div.className = 'story-item';
-
-                    const icon = document.createElement('i');
-                    icon.dataset.lucide = 'book-open';
-                    icon.setAttribute('width', '18');
-                    icon.setAttribute('height', '18');
-                    icon.style.flexShrink = '0';
-
-                    const titleSpan = document.createElement('span');
-                    titleSpan.className   = 'story-item-title';
-                    titleSpan.textContent = story.name || 'Unnamed Story';
-
-                    const metaSpan = document.createElement('span');
-                    metaSpan.className   = 'story-meta';
-                    metaSpan.textContent =
-                        `${msgCount} msg${msgCount !== 1 ? 's' : ''} · ${charSet.size} char${charSet.size !== 1 ? 's' : ''}`;
-
-                    div.appendChild(icon);
-                    div.appendChild(titleSpan);
-                    div.appendChild(metaSpan);
-
-                    if (isNew) {
-                        const badge = document.createElement('span');
-                        badge.className   = 'story-new-badge';
-                        badge.textContent = 'NEW';
-                        div.appendChild(badge);
-                    }
-
-                    div.addEventListener('click', () => {
-                        seenStore[storyId] = 1;
-                        localStorage.setItem(SEEN_KEY, JSON.stringify(seenStore));
-                        div.querySelector('.story-new-badge')?.remove();
-                        loadStory(index);
-                    });
-
-                    sidebar.appendChild(div);
-                });
-
-                lucide.createIcons({ nodes: Array.from(sidebar.querySelectorAll('[data-lucide]')) });
-
-            } catch (err) {
-                console.error('Load failed:', err);
-                const p = document.createElement('p');
-                p.style.cssText = 'color:red;padding:16px;text-align:center;';
-                p.textContent   = 'Failed to load stories.';
-                sidebar.insertAdjacentElement('beforeend', p);  // security fix #6
-            }
-        }
-
-        /* ── PWA install ── */
-        window.addEventListener('beforeinstallprompt', e => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installBtn.style.display = 'flex';
-        });
-
-        installBtn.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt = null;
-                installBtn.style.display = 'none';
-            }
-        });
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () =>
-                navigator.serviceWorker.register('/sw.js').catch(err => console.error(err)));
-        }
-
-        // Recompute tick positions whenever the layout changes
-        window.addEventListener('resize', () => {
-            if (chapters.length) computeChapterPositions();
-        });
-
-        init();
-    </script>
+  </main>
+</div>
+
+<!-- Shortcuts modal -->
+<div class="overlay" id="kb-overlay" role="dialog" aria-modal="true">
+  <div class="modal">
+    <h3>Keyboard <span class="tag">SHORTCUTS</span></h3>
+    <div class="kb-row"><div class="keys"><kbd class="k">J</kbd><kbd class="k">K</kbd></div><div class="desc">Next / previous message</div></div>
+    <div class="kb-row"><div class="keys"><kbd class="k">←</kbd><kbd class="k">→</kbd></div><div class="desc">Previous / next story</div></div>
+    <div class="kb-row"><div class="keys"><kbd class="k">F</kbd></div><div class="desc">Filter by focused character</div></div>
+    <div class="kb-row"><div class="keys"><kbd class="k">/</kbd></div><div class="desc">Search stories</div></div>
+    <div class="kb-row"><div class="keys"><kbd class="k">Esc</kbd></div><div class="desc">Clear filter / close panel</div></div>
+    <div class="kb-row"><div class="keys"><kbd class="k">?</kbd></div><div class="desc">Show / hide this panel</div></div>
+    <div class="modal-btns">
+      <button class="modal-btn primary" id="kb-close-btn">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Share consent -->
+<div class="overlay" id="share-modal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <h3>Heads up <span class="tag">SHARE</span></h3>
+    <p style="font-size:12.5px;line-height:1.5;color:var(--ink-soft);margin:0 0 6px;">
+      Sharing posts this message to a third-party service to generate a link.
+      No data is stored beyond link creation. This notice won't appear again.
+    </p>
+    <div class="modal-btns">
+      <button class="modal-btn" id="share-cancel">Cancel</button>
+      <button class="modal-btn primary" id="share-confirm">Share it</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ────────────── State ────────────── */
+  let stories = [];
+  let currentMessages = [];
+  let activeFilter = null;
+  let currentStory = -1;
+  let kbFocusIndex = -1;
+  let chapters = [];
+  let currentChapterIdx = 0;
+
+  /* ────────────── DOM ────────────── */
+  const $ = id => document.getElementById(id);
+  const sidebar = $('sidebar');
+  const sidebarBackdrop = $('sidebar-backdrop');
+  const scrollEl = $('scroll');
+  const timeline = $('timeline');
+  const progressBar = $('read-progress');
+  const progressTrack = $('progress-track');
+  const legendEl = $('legend');
+  const storyListEl = $('story-list');
+  const crumbPath = $('crumb-path');
+  const sliderCard = $('slider-card');
+  const sliderTrack = $('slider-trackw');
+  const sliderThumb = $('slider-thumb');
+  const sliderFill = $('slider-fill');
+  const sliderStart = $('slider-start');
+  const sliderEnd = $('slider-end');
+  const thumbLabel = $('thumb-label');
+  const kbOverlay = $('kb-overlay');
+  const shareModal = $('share-modal');
+  const storySearch = $('story-search');
+
+  /* ────────────── Character colors ────────────── */
+  const CHAR_COLORS = [
+    { bg: '#fff1ea', fg: '#9c3a1a', solid: 'var(--term-orange)' },
+    { bg: '#e9f5ef', fg: '#1a5e3f', solid: 'var(--term-green)' },
+    { bg: '#eaf1fb', fg: '#1d4a82', solid: 'var(--term-blue)' },
+    { bg: '#f0ecfa', fg: '#3d2a78', solid: 'var(--term-purple)' },
+    { bg: '#fbe9f1', fg: '#7a2747', solid: 'var(--term-pink)' },
+    { bg: '#fdf3d6', fg: '#7a5a10', solid: '#b88a1a' }
+  ];
+  const colorCache = new Map();
+  function hashName(n){ let h=0; for(let i=0;i<n.length;i++) h=(Math.imul(31,h)+n.charCodeAt(i))|0; return Math.abs(h); }
+  function getColor(name){
+    if (!colorCache.has(name)) colorCache.set(name, CHAR_COLORS[hashName(name||'')%CHAR_COLORS.length]);
+    return colorCache.get(name);
+  }
+  function initials(name){
+    if (!name) return '?';
+    return name.trim().split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  }
+
+  /* ────────────── Helpers ────────────── */
+  function safeURL(url){ return typeof url==='string' && /^https?:\/\//i.test(url.trim()) ? url.trim() : null; }
+  function scrollOffsetOf(el){
+    return el.getBoundingClientRect().top - scrollEl.getBoundingClientRect().top + scrollEl.scrollTop;
+  }
+
+  /* ────────────── Sidebar ────────────── */
+  function openSidebar(){ sidebar.classList.add('open'); sidebarBackdrop.classList.add('visible'); }
+  function closeSidebar(){ sidebar.classList.remove('open'); sidebarBackdrop.classList.remove('visible'); }
+  $('menu-toggle').addEventListener('click', openSidebar);
+  $('close-sidebar').addEventListener('click', closeSidebar);
+  sidebarBackdrop.addEventListener('click', closeSidebar);
+
+  /* ────────────── Story list ────────────── */
+  function renderStoryList(filter=''){
+    storyListEl.innerHTML = '';
+    const label = document.createElement('div');
+    label.className = 'story-list-label';
+    label.textContent = 'Active threads';
+    storyListEl.appendChild(label);
+
+    const f = filter.toLowerCase();
+    stories.forEach((s, idx) => {
+      if (f && !s.title.toLowerCase().includes(f)) return;
+      const last = s.messages[s.messages.length-1];
+      const item = document.createElement('div');
+      item.className = 'story-item' + (idx === currentStory ? ' active' : '');
+      item.innerHTML = `
+        <div class="story-dot"></div>
+        <div class="story-meta-col">
+          <div class="story-title"></div>
+          <div class="story-sub"><span><b>${s.messages.length}</b> msgs</span><span>${(last && last.timestamp || '').split(' ')[0]}</span></div>
+        </div>
+      `;
+      item.querySelector('.story-title').textContent = s.title;
+      if (idx === 0) {
+        const badge = document.createElement('div');
+        badge.className = 'new-badge';
+        badge.textContent = 'NEW';
+        item.appendChild(badge);
+      }
+      item.addEventListener('click', () => loadStory(idx));
+      storyListEl.appendChild(item);
+    });
+  }
+
+  storySearch.addEventListener('input', e => renderStoryList(e.target.value));
+
+  /* ────────────── Progress + slider ────────────── */
+  scrollEl.addEventListener('scroll', () => {
+    const h = scrollEl.scrollHeight - scrollEl.clientHeight;
+    progressBar.style.width = h > 0 ? (scrollEl.scrollTop / h) * 100 + '%' : '0%';
+    updateChapterFromScroll(scrollEl.scrollTop);
+  }, { passive: true });
+
+  function pctForIndex(i){
+    if (chapters.length <= 1) return 0;
+    const first = scrollOffsetOf(chapters[0].msgEl);
+    const last  = scrollOffsetOf(chapters[chapters.length-1].msgEl);
+    const range = last - first;
+    if (range <= 0) return (i/(chapters.length-1))*100;
+    return ((scrollOffsetOf(chapters[i].msgEl) - first)/range)*100;
+  }
+  function setThumbPct(p){ sliderThumb.style.left = p+'%'; sliderFill.style.width = p+'%'; }
+  function setSliderIdx(i){
+    currentChapterIdx = i;
+    setThumbPct(pctForIndex(i));
+    thumbLabel.textContent = chapters[i] ? chapters[i].label : '';
+  }
+  function jumpChapter(i){
+    setSliderIdx(i);
+    if (chapters[i] && chapters[i].msgEl) chapters[i].msgEl.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  function nearestChapter(pct){
+    let best=0, bd=Infinity;
+    chapters.forEach((_,i)=>{ const d=Math.abs(pctForIndex(i)-pct); if(d<bd){bd=d;best=i;} });
+    return best;
+  }
+  function updateChapterFromScroll(top){
+    if (!chapters.length) return;
+    let cur = 0;
+    chapters.forEach((c,i)=>{ if (c.msgEl && scrollOffsetOf(c.msgEl) <= top + 140) cur = i; });
+    if (cur !== currentChapterIdx) setSliderIdx(cur);
+  }
+  function renderTicks(){
+    progressTrack.querySelectorAll('.chapter-tick').forEach(t=>t.remove());
+    const total = scrollEl.scrollHeight - scrollEl.clientHeight;
+    if (total <= 0) return;
+    chapters.forEach(c => {
+      const pct = c.msgEl ? (scrollOffsetOf(c.msgEl)/total)*100 : 0;
+      if (pct > 1 && pct < 99) {
+        const t = document.createElement('div');
+        t.className = 'chapter-tick';
+        t.style.left = pct+'%';
+        progressTrack.appendChild(t);
+      }
+    });
+  }
+  function buildSlider(){
+    if (chapters.length <= 1){ sliderCard.style.display='none'; return; }
+    sliderStart.textContent = chapters[0].label;
+    sliderEnd.textContent = chapters[chapters.length-1].label;
+    sliderCard.style.display = 'block';
+    setSliderIdx(0);
+    attachThumbDrag();
+  }
+  function attachThumbDrag(){
+    function clientX(e){ return e.touches?e.touches[0].clientX:(e.changedTouches?e.changedTouches[0].clientX:e.clientX); }
+    function pctFromX(x){ const r=sliderTrack.getBoundingClientRect(); return Math.max(0,Math.min(100,(x-r.left)/r.width*100)); }
+    let dragging=false;
+    function onMove(e){
+      if(!dragging) return;
+      e.preventDefault();
+      const p = pctFromX(clientX(e));
+      const i = nearestChapter(p);
+      setThumbPct(p);
+      thumbLabel.textContent = chapters[i] ? chapters[i].label : '';
+    }
+    function onUp(e){
+      if(!dragging) return; dragging=false;
+      sliderThumb.classList.remove('dragging');
+      jumpChapter(nearestChapter(pctFromX(clientX(e))));
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('touchend', onUp);
+    }
+    sliderThumb.addEventListener('mousedown', e=>{
+      e.preventDefault(); dragging=true; sliderThumb.classList.add('dragging');
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+    sliderThumb.addEventListener('touchstart', e=>{
+      dragging=true; sliderThumb.classList.add('dragging');
+      document.addEventListener('touchmove', onMove, {passive:false});
+      document.addEventListener('touchend', onUp);
+    }, {passive:true});
+    sliderTrack.addEventListener('click', e=>{
+      if (e.target===sliderThumb || e.target===thumbLabel) return;
+      jumpChapter(nearestChapter(pctFromX(e.clientX)));
+    });
+  }
+
+  /* ────────────── Filter ────────────── */
+  function toggleFilter(username){
+    if (activeFilter === username) {
+      activeFilter = null;
+      timeline.classList.remove('is-filtering');
+      legendEl.querySelectorAll('.pill').forEach(p=>p.classList.remove('filtering'));
+    } else {
+      activeFilter = username;
+      timeline.classList.add('is-filtering');
+      legendEl.querySelectorAll('.pill').forEach(p=>p.classList.toggle('filtering', p.dataset.user===username));
+      timeline.querySelectorAll('.message').forEach(m=>m.classList.toggle('highlight', m.dataset.author===username));
+    }
+  }
+
+  /* ────────────── Attachments ────────────── */
+  function attachmentHTML(a){
+    if (!a || typeof a.type!=='string' || typeof a.url!=='string') return '';
+    const url = safeURL(a.url); if (!url) return '';
+    const t = a.type.toLowerCase();
+    if (t==='video') return `<div class="attach"><video controls src="${url}"></video></div>`;
+    if (t==='image') return `<div class="attach"><img src="${url}" loading="lazy" decoding="async"></div>`;
+    if (t==='audio') return `<div class="attach"><audio controls src="${url}"></audio></div>`;
+    if (t==='youtube'){
+      const m = url.match(/(?:youtube(?:-nocookie)?\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      const vid = m?m[1]:null;
+      if (!vid) return `<div class="attach" style="padding:12px;"><a href="${url}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);font-weight:700;">Watch on YouTube</a></div>`;
+      return `<div class="attach attach-yt"><iframe src="https://www.youtube.com/embed/${vid}" frameborder="0" allowfullscreen></iframe></div>`;
+    }
+    return '';
+  }
+
+  /* ────────────── Share ────────────── */
+  const SHARE_KEY = 'comic_share_consented';
+  let consented = localStorage.getItem(SHARE_KEY)==='1';
+  let pendingBtn=null, pendingMsg=null;
+  function handleShare(btn, idx){
+    const m = currentMessages[idx]; if (!m) return;
+    if (consented) return doShare(btn,m);
+    pendingBtn = btn; pendingMsg = m;
+    shareModal.classList.add('visible');
+  }
+  $('share-confirm').addEventListener('click', ()=>{
+    consented = true;
+    localStorage.setItem(SHARE_KEY,'1');
+    shareModal.classList.remove('visible');
+    if (pendingBtn && pendingMsg){ doShare(pendingBtn, pendingMsg); pendingBtn=pendingMsg=null; }
+  });
+  $('share-cancel').addEventListener('click', ()=>{
+    shareModal.classList.remove('visible');
+    pendingBtn = pendingMsg = null;
+  });
+  async function doShare(btn, m){
+    const orig = btn.innerHTML;
+    btn.innerHTML = '...sending';
+    btn.disabled = true;
+    try {
+      const res = await fetch('https://content-sharer-ten.vercel.app/api/share', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          text:m.text,
+          sender:(m.sender==='me'||m.sender==='right')?'right':'left',
+          timestamp:m.timestamp||new Date().toLocaleString(),
+          username:m.username||'User',
+          photoUrl:`https://via.placeholder.com/40?text=${encodeURIComponent(m.username||'User')}`,
+          attachment:m.attachment
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.link){
+        await navigator.clipboard.writeText(data.link);
+        btn.innerHTML = '<i data-lucide="check" width="12" height="12"></i> copied';
+        lucide.createIcons({ nodes:[btn] });
+      } else throw new Error('share failed');
+    } catch (err) {
+      console.error(err);
+      btn.innerHTML = 'failed';
+    } finally {
+      setTimeout(()=>{ btn.innerHTML = orig; btn.disabled=false; lucide.createIcons({nodes:[btn]}); }, 2400);
+    }
+  }
+
+  /* ────────────── Keyboard ────────────── */
+  function openKb(){ kbOverlay.classList.add('visible'); }
+  function closeKb(){ kbOverlay.classList.remove('visible'); }
+  $('kb-help-btn').addEventListener('click', openKb);
+  $('kb-close-btn').addEventListener('click', closeKb);
+  kbOverlay.addEventListener('click', e=>{ if (e.target===kbOverlay) closeKb(); });
+  shareModal.addEventListener('click', e=>{ if (e.target===shareModal) shareModal.classList.remove('visible'); });
+
+  function getMessageEls(){ return Array.from(timeline.querySelectorAll('.message')); }
+  function setKbFocus(i){
+    const msgs = getMessageEls(); if (!msgs.length) return;
+    i = Math.max(0, Math.min(msgs.length-1, i));
+    msgs.forEach((m,k)=>m.classList.toggle('kb-focused', k===i));
+    kbFocusIndex = i;
+    msgs[i].scrollIntoView({behavior:'smooth', block:'center'});
+  }
+
+  document.addEventListener('keydown', e=>{
+    if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) {
+      if (e.key==='Escape') e.target.blur();
+      return;
+    }
+    const anyOverlay = kbOverlay.classList.contains('visible') || shareModal.classList.contains('visible');
+    if (e.key==='?' ) { e.preventDefault(); anyOverlay?closeKb():openKb(); return; }
+    if (e.key==='/') { e.preventDefault(); openSidebar(); storySearch.focus(); return; }
+    if (e.key==='Escape') {
+      if (kbOverlay.classList.contains('visible')) return closeKb();
+      if (shareModal.classList.contains('visible')) return shareModal.classList.remove('visible');
+      if (sidebar.classList.contains('open')) return closeSidebar();
+      if (activeFilter) return toggleFilter(activeFilter);
+      return;
+    }
+    if (anyOverlay) return;
+    if (e.key==='j'||e.key==='J'){ e.preventDefault(); setKbFocus(kbFocusIndex+1); }
+    if (e.key==='k'||e.key==='K'){ e.preventDefault(); setKbFocus(kbFocusIndex-1); }
+    if (e.key==='ArrowRight' && currentStory < stories.length-1){ e.preventDefault(); loadStory(currentStory+1); }
+    if (e.key==='ArrowLeft' && currentStory > 0){ e.preventDefault(); loadStory(currentStory-1); }
+    if ((e.key==='f'||e.key==='F') && kbFocusIndex>=0){
+      const msgs = getMessageEls();
+      const f = msgs[kbFocusIndex]; if (f) toggleFilter(f.dataset.author);
+    }
+  });
+
+  /* ────────────── Load story ────────────── */
+  function loadStory(index){
+    const story = stories[index];
+    currentMessages = story.messages;
+    currentStory = index;
+    kbFocusIndex = -1;
+    activeFilter = null;
+
+    timeline.classList.remove('is-filtering');
+    timeline.innerHTML = '';
+    $('empty-state').style.display = 'none';
+    $('story-header').style.display = 'block';
+    timeline.classList.add('active');
+    crumbPath.innerHTML = `timeline · <b></b>`;
+    crumbPath.querySelector('b').textContent = story.title;
+
+    if (window.innerWidth <= 900) closeSidebar();
+
+    renderStoryList(storySearch.value);
+
+    // Legend
+    legendEl.innerHTML = '';
+    const lbl = document.createElement('span'); lbl.className='legend-label'; lbl.textContent='who:';
+    legendEl.appendChild(lbl);
+
+    const seen = new Map();
+    story.messages.forEach(m => { if (m.username && !seen.has(m.username)) seen.set(m.username, true); });
+    seen.forEach((_, name) => {
+      const c = getColor(name);
+      const pill = document.createElement('div');
+      pill.className = 'pill';
+      pill.dataset.user = name;
+      pill.innerHTML = `<div class="dot"></div><span></span>`;
+      pill.querySelector('.dot').style.background = c.solid;
+      pill.querySelector('.dot').textContent = initials(name);
+      pill.querySelector('span').textContent = name;
+      pill.addEventListener('click', () => toggleFilter(name));
+      legendEl.appendChild(pill);
+    });
+
+    // Chapters
+    chapters = [];
+    const seenDates = new Map();
+    story.messages.forEach((m,i)=>{
+      const raw = (m.timestamp||'').trim();
+      const label = raw.split(/[\s,T]/)[0] || 'Start';
+      if (!seenDates.has(label)){ seenDates.set(label, i); chapters.push({label, startIndex:i, msgEl:null}); }
+    });
+
+    // Build messages with date dividers
+    const frag = document.createDocumentFragment();
+    let lastDate = null;
+    story.messages.forEach((m,i)=>{
+      const side = (m.sender==='right'||m.sender==='me') ? 'right' : 'left';
+      const color = getColor(m.username);
+      const dateLabel = ((m.timestamp||'').trim().split(/[\s,T]/)[0]) || 'Start';
+      const timeOnly = ((m.timestamp||'').trim().split(/[\s,T]/)[1]) || '';
+
+      if (dateLabel !== lastDate){
+        const div = document.createElement('div');
+        div.className = 'date-divider';
+        div.innerHTML = `<span class="date-chip"></span>`;
+        div.querySelector('.date-chip').textContent = dateLabel;
+        frag.appendChild(div);
+        lastDate = dateLabel;
+      }
+
+      const msg = document.createElement('div');
+      msg.className = `message ${side}`;
+      msg.dataset.author = m.username || 'unknown';
+      msg.style.setProperty('--char-color', color.solid);
+      msg.innerHTML = `
+        <div class="msg-body">
+          <div class="avatar"></div>
+          <div class="card">
+            <div class="card-head">
+              <div class="traffic"><span></span><span></span><span></span></div>
+              <div class="card-title">
+                <span class="at">@</span><span class="user"></span>
+                <span class="sep">·</span><span class="ts"></span>
+              </div>
+              <div class="card-num">#${i+1}</div>
+            </div>
+            <div class="card-body"></div>
+            ${attachmentHTML(m.attachment)}
+            <div class="card-foot">
+              <button class="share-btn"><i data-lucide="link-2" width="12" height="12"></i> share</button>
+            </div>
+          </div>
+        </div>
+      `;
+      const av = msg.querySelector('.avatar');
+      av.textContent = initials(m.username);
+      av.style.background = color.bg;
+      av.style.color = color.fg;
+      av.style.borderColor = color.solid;
+      msg.querySelector('.user').textContent = m.username || 'unknown';
+      msg.querySelector('.user').style.color = color.fg;
+      msg.querySelector('.ts').textContent = timeOnly || dateLabel;
+      msg.querySelector('.card-body').textContent = m.text || '';
+
+      const btn = msg.querySelector('.share-btn');
+      btn.addEventListener('click', () => handleShare(btn, i));
+
+      frag.appendChild(msg);
+
+      // Attach chapter msgEl reference
+      const ch = chapters.find(c => c.startIndex === i);
+      if (ch) ch.msgEl = msg;
+    });
+
+    timeline.appendChild(frag);
+    lucide.createIcons();
+    buildSlider();
+    requestAnimationFrame(()=>{
+      renderTicks();
+      scrollEl.scrollTop = 0;
+    });
+  }
+
+  /* ────────────── PWA install (optional) ────────────── */
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    $('install-btn').style.display = 'inline-flex';
+  });
+  $('install-btn').addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    $('install-btn').style.display = 'none';
+  });
+
+  /* ────────────── Init ────────────── */
+  (async function init() {
+    try {
+      const res = await fetch('https://static-conf.vercel.app/go/this-and-that');
+      const raw = await res.json();
+      stories = raw.map(s => ({ title: s.name || s.title || 'Untitled', messages: s.messages || [] }));
+    } catch(e) {
+      console.warn('Failed to load remote data.', e);
+      stories = [];
+    }
+    renderStoryList();
+    lucide.createIcons();
+    if (window.innerWidth > 900 && stories.length > 0) loadStory(0);
+  })();
+</script>
 </body>
 </html>
