@@ -1105,6 +1105,260 @@
     .comic-page-title { font-size: 22px; }
   }
 
+  /* ────────────── BD (bande dessinée) template ────────────── */
+  body[data-template="bd"] {
+    background: #e9dcc1;
+    font-family: 'Caveat', 'Patrick Hand', cursive;
+  }
+  body[data-template="bd"] .content {
+    background:
+      radial-gradient(ellipse at top, rgba(255,235,180,.35), transparent 60%),
+      repeating-linear-gradient(45deg, rgba(80,50,20,.025) 0 2px, transparent 2px 8px),
+      #e9dcc1;
+  }
+  body[data-template="bd"] .crumb-prefix,
+  body[data-template="bd"] .crumb-path { font-family: var(--mono); }
+  body[data-template="bd"] .scroll { padding: 28px 24px 100px; }
+  body[data-template="bd"] .timeline { max-width: 880px; }
+  body[data-template="bd"] .date-divider { display: none; }
+
+  .bd-page {
+    background: #fbf2dc;
+    border: 2.5px solid #1a0f05;
+    box-shadow:
+      6px 6px 0 rgba(26,15,5,.85),
+      0 20px 38px -12px rgba(0,0,0,.3);
+    padding: 22px 22px 14px;
+    margin: 0 auto 44px;
+    position: relative;
+  }
+  .bd-page::before, .bd-page::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+  }
+  .bd-page::before {
+    inset: 4px;
+    border: 1px solid rgba(26,15,5,.15);
+  }
+  .bd-page-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #1a0f05;
+    position: relative;
+    z-index: 1;
+  }
+  .bd-page-title {
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    font-size: 30px;
+    line-height: 1;
+    color: #1a0f05;
+    letter-spacing: .5px;
+  }
+  .bd-page-chapter {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #1a0f05;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    border: 1.5px solid #1a0f05;
+    padding: 3px 10px;
+    background: #f4d35e;
+  }
+  .bd-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-rows: minmax(200px, auto);
+    gap: 8px;
+    position: relative;
+    z-index: 1;
+  }
+  .bd-panel {
+    position: relative;
+    border: 2.5px solid #1a0f05;
+    background: #d8c79a;
+    overflow: hidden;
+    min-height: 220px;
+    transition: filter .25s, opacity .25s;
+  }
+  .bd-panel.tall { min-height: 300px; }
+  body[data-template="bd"] .timeline.is-filtering .bd-panel { opacity: .25; filter: grayscale(1); }
+  body[data-template="bd"] .timeline.is-filtering .bd-panel.highlight { opacity: 1; filter: none; }
+  body[data-template="bd"] .bd-panel.kb-focused {
+    outline: 4px solid var(--accent);
+    outline-offset: 3px;
+  }
+  .bd-art {
+    position: absolute;
+    inset: 0;
+    background: #d8c79a;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .bd-bubble {
+    position: absolute;
+    background: #fffdf3;
+    border: 2px solid #1a0f05;
+    border-radius: 50% / 55%;
+    padding: 10px 14px 11px;
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.08;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    color: #1a0f05;
+    z-index: 3;
+    max-width: 78%;
+    min-width: 70px;
+    box-shadow: 1.5px 1.5px 0 rgba(26,15,5,.4);
+  }
+  .bd-bubble.long {
+    border-radius: 18px / 24px;
+    text-align: left;
+    text-transform: none;
+    font-size: 14px;
+    letter-spacing: .2px;
+    line-height: 1.18;
+    padding: 9px 13px 10px;
+  }
+  .bd-bubble.short { font-size: 18px; }
+  /* tails: two pseudos -> outlined triangle */
+  .bd-bubble::before,
+  .bd-bubble::after {
+    content: "";
+    position: absolute;
+    width: 0; height: 0;
+  }
+  /* default tail: bottom-left, pointing down-left */
+  .bd-bubble::before {
+    bottom: -22px;
+    left: 18%;
+    border: 12px solid transparent;
+    border-top-color: #1a0f05;
+    border-right: 0;
+    transform: skewX(-8deg);
+  }
+  .bd-bubble::after {
+    bottom: -16px;
+    left: 21%;
+    border: 9px solid transparent;
+    border-top-color: #fffdf3;
+    border-right: 0;
+    transform: skewX(-8deg);
+  }
+  .bd-bubble.tail-br::before { left: auto; right: 18%; border: 12px solid transparent; border-top-color: #1a0f05; border-left: 0; transform: skewX(8deg); }
+  .bd-bubble.tail-br::after  { left: auto; right: 21%; border: 9px solid transparent; border-top-color: #fffdf3; border-left: 0; transform: skewX(8deg); }
+  .bd-bubble.tail-bc::before { left: 45%; border: 11px solid transparent; border-top-color: #1a0f05; }
+  .bd-bubble.tail-bc::after  { left: 47.5%; border: 8px solid transparent; border-top-color: #fffdf3; }
+
+  /* narration / caption box (yellow rectangle, top corner) */
+  .bd-caption-box {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    background: #f4d35e;
+    border: 2px solid #1a0f05;
+    padding: 7px 11px 8px;
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1.18;
+    letter-spacing: .2px;
+    color: #1a0f05;
+    z-index: 3;
+    box-shadow: 2.5px 2.5px 0 #1a0f05;
+    text-transform: none;
+    text-align: left;
+    max-height: 55%;
+    overflow: hidden;
+  }
+  .bd-caption-box.bottom { top: auto; bottom: 6px; }
+
+  .bd-num {
+    position: absolute;
+    bottom: 5px;
+    right: 7px;
+    z-index: 4;
+    font-family: var(--mono);
+    font-size: 10px;
+    background: #1a0f05;
+    color: #fbf2dc;
+    padding: 1px 6px;
+    letter-spacing: .08em;
+  }
+  .bd-share {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 5;
+    background: #fffdf3;
+    border: 1.5px solid #1a0f05;
+    color: #1a0f05;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity .15s;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  .bd-panel:hover .bd-share { opacity: 1; }
+  .bd-share:hover { background: #f4d35e; }
+  .bd-caption-box ~ .bd-share { top: auto; bottom: 6px; left: 6px; right: auto; }
+
+  .bd-page-foot {
+    text-align: center;
+    margin-top: 14px;
+    padding-top: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #5c3d20;
+    letter-spacing: .2em;
+    position: relative;
+    z-index: 1;
+  }
+  .bd-page-foot::before,
+  .bd-page-foot::after {
+    content: "—";
+    margin: 0 8px;
+    opacity: .6;
+  }
+
+  body[data-template="bd"] .bd-panel .attach {
+    position: absolute;
+    inset: auto 6px 6px 6px;
+    margin: 0;
+    border: 2px solid #1a0f05;
+    border-radius: 0;
+    background: #1a0f05;
+    z-index: 2;
+    max-height: 45%;
+    overflow: hidden;
+  }
+  body[data-template="bd"] .bd-panel .attach img,
+  body[data-template="bd"] .bd-panel .attach video { max-height: 100%; object-fit: cover; }
+
+  @media (max-width: 720px) {
+    .bd-grid { grid-template-columns: repeat(6, 1fr); gap: 6px; }
+    .bd-panel { min-height: 180px; }
+    .bd-page { padding: 16px 14px 10px; }
+    .bd-page-title { font-size: 24px; }
+    .bd-bubble { font-size: 14px; padding: 8px 10px; }
+    .bd-bubble.long { font-size: 12.5px; }
+  }
+
   /* scrollbar */
   .scroll::-webkit-scrollbar,
   .story-list::-webkit-scrollbar { width: 10px; }
@@ -1171,6 +1425,10 @@
           <button class="tb-btn template-btn" data-template="comic" aria-pressed="false">
             <i data-lucide="book-open" width="14" height="14"></i>
             <span class="btn-label">Comic</span>
+          </button>
+          <button class="tb-btn template-btn" data-template="bd" aria-pressed="false">
+            <i data-lucide="scroll-text" width="14" height="14"></i>
+            <span class="btn-label">BD</span>
           </button>
         </div>
         <button class="tb-btn" id="kb-help-btn" aria-label="Keyboard shortcuts">
@@ -1756,7 +2014,7 @@
       activeFilter = username;
       timeline.classList.add('is-filtering');
       legendEl.querySelectorAll('.pill').forEach(p=>p.classList.toggle('filtering', p.dataset.user===username));
-      timeline.querySelectorAll('.message, .panel').forEach(el=>el.classList.toggle('highlight', el.dataset.author===username));
+      timeline.querySelectorAll('.message, .panel, .bd-panel').forEach(el=>el.classList.toggle('highlight', el.dataset.author===username));
     }
   }
 
@@ -1837,7 +2095,7 @@
   shareModal.addEventListener('click', e=>{ if (e.target===shareModal) shareModal.classList.remove('visible'); });
 
   function getMessageEls(){
-    const sel = currentTemplate === 'comic' ? '.panel' : '.message';
+    const sel = currentTemplate === 'comic' ? '.panel' : currentTemplate === 'bd' ? '.bd-panel' : '.message';
     return Array.from(timeline.querySelectorAll(sel));
   }
   function setKbFocus(i){
@@ -2028,7 +2286,240 @@
     timeline.appendChild(frag);
   }
 
-  /* ────────────── Load story ────────────── */
+  /* ────────────── BD art library (warm painterly silhouettes) ────────────── */
+  const BD_INK = '#1a0f05';
+
+  function bdMarket(){
+    return `<svg viewBox="0 0 400 280" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="bs1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6c178"/><stop offset=".7" stop-color="#d68a3a"/><stop offset="1" stop-color="#a05f2a"/></linearGradient></defs>
+      <rect width="400" height="280" fill="url(#bs1)"/>
+      <g fill="#7a4a20"><rect x="20" y="120" width="55" height="80"/><path d="M20 120 L47 95 L75 120 Z"/><rect x="95" y="100" width="42" height="100"/><rect x="285" y="125" width="50" height="75"/><rect x="345" y="105" width="40" height="95"/><path d="M345 105 L365 85 L385 105 Z"/></g>
+      <g fill="#5c3d20" stroke="${BD_INK}" stroke-width="1.5"><path d="M150 130 L260 130 L248 175 L162 175 Z"/><path d="M165 130 L172 175 M185 130 L192 175 M205 130 L212 175 M225 130 L232 175 M245 130 L248 175" stroke="${BD_INK}" fill="none"/></g>
+      <g fill="${BD_INK}"><ellipse cx="55" cy="208" rx="17" ry="11"/><path d="M40 218 Q55 200 70 218 L70 280 L40 280 Z"/><ellipse cx="105" cy="214" rx="19" ry="12"/><path d="M88 224 Q105 204 122 224 L122 280 L88 280 Z"/><ellipse cx="165" cy="218" rx="22" ry="14"/><path d="M145 230 Q165 206 185 230 L185 280 L145 280 Z"/><ellipse cx="225" cy="216" rx="20" ry="13"/><path d="M207 228 Q225 206 243 228 L243 280 L207 280 Z"/><ellipse cx="285" cy="218" rx="22" ry="14"/><path d="M265 230 Q285 206 305 230 L305 280 L265 280 Z"/><ellipse cx="345" cy="214" rx="20" ry="13"/><path d="M327 226 Q345 204 363 226 L363 280 L327 280 Z"/></g>
+    </svg>`;
+  }
+  function bdInterior(){
+    return `<svg viewBox="0 0 400 280" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs><radialGradient id="bi1" cx="50%" cy="35%" r="70%"><stop offset="0" stop-color="#f4c878"/><stop offset=".5" stop-color="#b56e2c"/><stop offset="1" stop-color="#3a1f0a"/></radialGradient></defs>
+      <rect width="400" height="280" fill="url(#bi1)"/>
+      <g fill="${BD_INK}"><rect x="0" y="200" width="400" height="80"/><path d="M40 200 L40 60 L100 60 L100 200 Z M300 200 L300 70 L360 70 L360 200 Z"/></g>
+      <g fill="#f4d35e" opacity=".9"><ellipse cx="200" cy="40" rx="14" ry="22"/><path d="M186 40 Q200 0 214 40 L210 70 L190 70 Z"/></g>
+      <g fill="${BD_INK}"><path d="M196 12 L196 0 L204 0 L204 12 Z"/></g>
+      <g fill="${BD_INK}"><ellipse cx="160" cy="170" rx="22" ry="14"/><path d="M138 184 Q160 156 182 184 L182 240 L138 240 Z"/><ellipse cx="240" cy="172" rx="22" ry="14"/><path d="M218 186 Q240 158 262 186 L262 240 L218 240 Z"/></g>
+      <rect x="155" y="220" width="90" height="14" fill="${BD_INK}"/>
+    </svg>`;
+  }
+  function bdLandscape(){
+    return `<svg viewBox="0 0 400 280" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="bl1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e7c688"/><stop offset=".5" stop-color="#d9914a"/><stop offset="1" stop-color="#7a4a20"/></linearGradient></defs>
+      <rect width="400" height="280" fill="url(#bl1)"/>
+      <circle cx="310" cy="85" r="32" fill="#fdf2c8" opacity=".85"/>
+      <g fill="#6b3a1a"><path d="M0 200 L80 140 L150 180 L220 130 L300 170 L400 150 L400 280 L0 280 Z"/></g>
+      <g fill="${BD_INK}"><path d="M0 240 L100 200 L200 230 L320 210 L400 235 L400 280 L0 280 Z"/></g>
+      <g fill="${BD_INK}"><ellipse cx="200" cy="218" rx="10" ry="7"/><path d="M192 224 Q200 210 208 224 L210 260 L190 260 Z"/></g>
+    </svg>`;
+  }
+  function bdNight(){
+    return `<svg viewBox="0 0 400 280" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="bn1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a4a6c"/><stop offset=".6" stop-color="#1a2540"/><stop offset="1" stop-color="#0a0f1f"/></linearGradient></defs>
+      <rect width="400" height="280" fill="url(#bn1)"/>
+      <circle cx="320" cy="60" r="24" fill="#f4d35e"/>
+      <circle cx="312" cy="55" r="18" fill="#1a2540" opacity=".6"/>
+      <g fill="#fdf2c8"><circle cx="40" cy="40" r="1.5"/><circle cx="100" cy="25" r="1"/><circle cx="160" cy="50" r="1.5"/><circle cx="240" cy="30" r="1"/><circle cx="380" cy="45" r="1.5"/><circle cx="70" cy="80" r="1"/><circle cx="220" cy="95" r="1"/></g>
+      <g fill="#0a0f1f"><rect x="0" y="170" width="400" height="110"/><rect x="40" y="140" width="50" height="40"/><rect x="120" y="120" width="60" height="60"/><rect x="210" y="135" width="55" height="45"/><rect x="290" y="115" width="65" height="65"/></g>
+      <g fill="#f4c878"><rect x="55" y="155" width="6" height="8"/><rect x="135" y="135" width="6" height="8"/><rect x="155" y="155" width="6" height="8"/><rect x="225" y="150" width="6" height="8"/><rect x="305" y="130" width="6" height="8"/><rect x="325" y="155" width="6" height="8"/></g>
+    </svg>`;
+  }
+  function bdPortrait(){
+    return `<svg viewBox="0 0 400 280" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs><radialGradient id="bp1" cx="50%" cy="40%" r="70%"><stop offset="0" stop-color="#e8b878"/><stop offset="1" stop-color="#6b3a1a"/></radialGradient></defs>
+      <rect width="400" height="280" fill="url(#bp1)"/>
+      <g fill="${BD_INK}"><ellipse cx="200" cy="135" rx="55" ry="65"/><path d="M150 200 Q200 160 250 200 L290 280 L110 280 Z"/></g>
+      <g fill="#3a1f0a"><path d="M155 95 Q200 60 245 95 L250 75 Q200 40 150 75 Z"/></g>
+      <g fill="#e8b878"><ellipse cx="182" cy="135" rx="5" ry="3"/><ellipse cx="218" cy="135" rx="5" ry="3"/></g>
+    </svg>`;
+  }
+  function bdGroup(){
+    return `<svg viewBox="0 0 400 280" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="bg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8a45c"/><stop offset="1" stop-color="#7a4a20"/></linearGradient></defs>
+      <rect width="400" height="280" fill="url(#bg1)"/>
+      <g fill="#5c3d20"><path d="M0 200 L400 200 L400 280 L0 280 Z"/></g>
+      <g fill="${BD_INK}">
+        <ellipse cx="80" cy="120" rx="28" ry="32"/><path d="M50 155 Q80 130 110 155 L120 280 L40 280 Z"/>
+        <ellipse cx="160" cy="115" rx="30" ry="34"/><path d="M125 152 Q160 124 195 152 L205 280 L115 280 Z"/>
+        <ellipse cx="245" cy="118" rx="28" ry="32"/><path d="M215 155 Q245 130 275 155 L285 280 L205 280 Z"/>
+        <ellipse cx="325" cy="120" rx="30" ry="34"/><path d="M290 158 Q325 130 360 158 L370 280 L280 280 Z"/>
+      </g>
+    </svg>`;
+  }
+  function bdAction(){
+    return `<svg viewBox="0 0 400 280" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="ba1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6c178"/><stop offset=".6" stop-color="#c47a3e"/><stop offset="1" stop-color="#3a1f0a"/></linearGradient></defs>
+      <rect width="400" height="280" fill="url(#ba1)"/>
+      <g stroke="#fdf2c8" stroke-width="3" fill="none" opacity=".55"><path d="M-20 50 L420 80"/><path d="M-20 90 L420 130"/><path d="M-20 140 L420 180"/><path d="M-20 200 L420 240"/></g>
+      <g fill="${BD_INK}"><path d="M180 80 Q220 60 260 90 L280 140 Q260 160 240 150 L200 170 Q170 160 150 130 Z"/><ellipse cx="220" cy="95" rx="20" ry="24"/></g>
+      <g fill="#5c3d20"><path d="M0 230 L400 230 L400 280 L0 280 Z"/></g>
+    </svg>`;
+  }
+
+  const BD_ART_LIB = [bdMarket, bdInterior, bdLandscape, bdNight, bdPortrait, bdGroup, bdAction, bdMarket];
+  function pickBDArt(msg, idx){
+    const seed = hashName((msg.username||'') + idx + (msg.text||'').length);
+    return BD_ART_LIB[seed % BD_ART_LIB.length]();
+  }
+
+  /* BD tier patterns — 12-col grid */
+  const BD_PATTERNS = [[12],[6,6],[4,4,4],[5,7],[8,4],[3,6,3],[7,5],[12],[6,6],[4,8]];
+  function bdSpansFor(n){
+    const out = [];
+    let pi = 0;
+    while (out.length < n){
+      const pat = BD_PATTERNS[pi % BD_PATTERNS.length];
+      for (const s of pat){
+        if (out.length >= n) break;
+        out.push(s);
+      }
+      pi++;
+    }
+    // pad final row so it fills 12 cols
+    let sum = 0;
+    const rows = [[]];
+    for (const s of out){
+      if (sum + s > 12){ rows.push([]); sum = 0; }
+      rows[rows.length-1].push(s);
+      sum += s;
+      if (sum === 12){ rows.push([]); sum = 0; }
+    }
+    if (!rows[rows.length-1].length) rows.pop();
+    const last = rows[rows.length-1];
+    const lastSum = last.reduce((a,b)=>a+b,0);
+    if (lastSum < 12 && last.length) last[last.length-1] += (12 - lastSum);
+    return rows.flat();
+  }
+
+  function tailClassFor(msg, idx){
+    if (msg.sender === 'right' || msg.sender === 'me') return 'tail-br';
+    if (msg.sender === 'left') {
+      // alternate slightly by hash so it doesn't always point the same direction
+      const h = hashName((msg.username||'') + idx);
+      return (h % 3 === 0) ? 'tail-bc' : '';  // default == bl
+    }
+    return '';
+  }
+
+  /* ────────────── Render: BD ────────────── */
+  function renderBD(story){
+    const groups = [];
+    let lastDate = null;
+    story.messages.forEach((m, i) => {
+      const { date } = parseTimestamp(m.timestamp);
+      if (date !== lastDate){ groups.push({ date, items: [] }); lastDate = date; }
+      groups[groups.length-1].items.push({ m, i });
+    });
+
+    chapters = [];
+    const frag = document.createDocumentFragment();
+    let pageCounter = 0;
+
+    groups.forEach((g) => {
+      // split very-long groups into multiple pages of up to 8 panels
+      const pages = [];
+      for (let k = 0; k < g.items.length; k += 8) pages.push(g.items.slice(k, k+8));
+
+      pages.forEach((items, pi) => {
+        pageCounter++;
+        const page = document.createElement('div');
+        page.className = 'bd-page';
+
+        const head = document.createElement('div');
+        head.className = 'bd-page-head';
+        head.innerHTML = `<div class="bd-page-title"></div><div class="bd-page-chapter"></div>`;
+        head.querySelector('.bd-page-title').textContent = story.title;
+        head.querySelector('.bd-page-chapter').textContent = g.date + (pages.length > 1 ? ' · pt ' + (pi+1) : '');
+        page.appendChild(head);
+
+        const grid = document.createElement('div');
+        grid.className = 'bd-grid';
+        const spans = bdSpansFor(items.length);
+
+        items.forEach((it, k) => {
+          const { m, i } = it;
+          const span = spans[k] || 6;
+
+          const panel = document.createElement('div');
+          panel.className = 'bd-panel' + (span >= 12 ? ' tall' : '');
+          panel.style.gridColumn = `span ${span}`;
+          panel.dataset.author = m.username || 'unknown';
+          panel.dataset.msgIndex = String(i);
+
+          const txt = (m.text || '').trim();
+          const isLong = txt.length > 110;
+          const isShort = txt.length <= 25;
+
+          // use the entry's image attachment as the panel background
+          const imgUrl = (m.attachment && m.attachment.type === 'image') ? safeURL(m.attachment.url) : null;
+          const artStyle = imgUrl ? `background-image:url('${imgUrl.replace(/'/g, "%27")}');` : '';
+
+          let textBlock;
+          if (isLong) {
+            // caption / narration box at top
+            textBlock = `<div class="bd-caption-box">${escapeHTML(txt)}</div>`;
+          } else {
+            const tail = tailClassFor(m, i);
+            const sizeClass = isShort ? ' short' : '';
+            // place bubble in top area, horizontal varies a bit by tail direction
+            const top = 8 + (hashName(String(i)) % 18);
+            const horiz = tail === 'tail-br' ? `right: ${6 + (hashName(String(i+1)) % 14)}%;` :
+                          tail === 'tail-bc' ? `left: 50%; transform: translateX(-50%);` :
+                          `left: ${6 + (hashName(String(i+2)) % 14)}%;`;
+            textBlock = `<div class="bd-bubble${sizeClass} ${tail}" style="top:${top}%; ${horiz}">${escapeHTML(txt)}</div>`;
+          }
+
+          panel.innerHTML = `
+            <div class="bd-art" style="${artStyle}"></div>
+            ${textBlock}
+            <div class="bd-num">#${i+1}</div>
+            <button class="bd-share" title="share">share</button>
+          `;
+
+          if (m.attachment && m.attachment.type !== 'image'){
+            // non-image attachments (video / audio / youtube) still get an inline tile
+            const html = attachmentHTML(m.attachment);
+            if (html){
+              const wrap = document.createElement('div');
+              wrap.style.cssText = 'position:absolute; right:6px; bottom:24px; width:42%; max-height:45%; z-index:2; border:2px solid #1a0f05; overflow:hidden; background:#1a0f05;';
+              wrap.innerHTML = html.replace(/<div class="attach">/, '<div>').replace(/<\/div>$/, '</div>');
+              panel.appendChild(wrap);
+            }
+          }
+
+          const btn = panel.querySelector('.bd-share');
+          btn.addEventListener('click', e => { e.stopPropagation(); handleShare(btn, i); });
+
+          if (k === 0){
+            chapters.push({ label: g.date, startIndex: i, msgEl: panel });
+          }
+
+          grid.appendChild(panel);
+        });
+
+        page.appendChild(grid);
+
+        const foot = document.createElement('div');
+        foot.className = 'bd-page-foot';
+        foot.textContent = String(pageCounter).padStart(2,'0');
+        page.appendChild(foot);
+
+        frag.appendChild(page);
+      });
+    });
+
+    timeline.appendChild(frag);
+  }
+
+  function escapeHTML(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+  }
   function loadStory(index){
     const story = stories[index];
     currentMessages = story.messages;
@@ -2067,7 +2558,8 @@
     });
 
     // Dispatch render
-    if (currentTemplate === 'comic') renderComic(story);
+    if (currentTemplate === 'bd') renderBD(story);
+    else if (currentTemplate === 'comic') renderComic(story);
     else renderTerminal(story);
 
     lucide.createIcons();
