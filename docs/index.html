@@ -6,7 +6,7 @@
 <title>Comic Timeline</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Comic+Neue:wght@700&family=Patrick+Hand&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@0.574.0/dist/umd/lucide.min.js"></script>
 <style>
   :root {
@@ -330,6 +330,32 @@
     box-shadow: var(--shadow-sm);
   }
   .tb-btn.primary:hover { box-shadow: var(--shadow); }
+
+  .template-switch {
+    display: inline-flex;
+    gap: 0;
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .template-switch .tb-btn {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    height: 30px;
+  }
+  .template-switch .tb-btn:hover {
+    transform: none;
+    box-shadow: none;
+    background: var(--rail);
+  }
+  .template-switch .tb-btn + .tb-btn { border-left: 1.5px solid var(--line); }
+  .template-switch .tb-btn.active {
+    background: var(--accent);
+    color: #fff;
+  }
+  .template-switch .tb-btn.active:hover { background: var(--accent); }
 
   /* mobile menu trigger */
   #menu-toggle { display: none; }
@@ -891,6 +917,194 @@
     .crumb-path { font-size: 12px; }
   }
 
+  /* ────────────── Comic page template ────────────── */
+  body[data-template="comic"] {
+    background: #ededed;
+    font-family: 'Patrick Hand', 'Comic Neue', cursive;
+  }
+  body[data-template="comic"] .content {
+    background:
+      repeating-linear-gradient(45deg, rgba(0,0,0,.018) 0 2px, transparent 2px 6px),
+      #ededed;
+  }
+  body[data-template="comic"] .scroll {
+    padding: 28px 24px 100px;
+  }
+  body[data-template="comic"] .timeline {
+    max-width: 920px;
+  }
+  body[data-template="comic"] .crumb-prefix,
+  body[data-template="comic"] .crumb-path {
+    font-family: var(--mono);
+  }
+
+  /* hide terminal date dividers in comic mode (each page has its own plate) */
+  body[data-template="comic"] .date-divider { display: none; }
+
+  /* page */
+  .comic-page {
+    background: #fff;
+    border: 3px solid #0a0a0a;
+    box-shadow: 8px 8px 0 rgba(0,0,0,.85), 0 18px 30px -10px rgba(0,0,0,.25);
+    padding: 22px 22px 14px;
+    margin: 0 auto 36px;
+    position: relative;
+  }
+  .comic-page-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #0a0a0a;
+  }
+  .comic-page-title {
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    font-size: 26px;
+    line-height: 1;
+    color: #0a0a0a;
+    letter-spacing: .5px;
+  }
+  .comic-page-stamp {
+    font-family: 'Patrick Hand', cursive;
+    font-size: 13px;
+    color: #0a0a0a;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    border: 2px solid #0a0a0a;
+    padding: 2px 10px;
+    transform: rotate(-2deg);
+    background: #fff;
+  }
+
+  .panel-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px;
+  }
+
+  .panel {
+    position: relative;
+    background: #fff;
+    border: 3px solid #0a0a0a;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 230px;
+    transition: filter .25s, opacity .25s;
+  }
+  body[data-template="comic"] .timeline.is-filtering .panel { opacity: .25; filter: grayscale(1); }
+  body[data-template="comic"] .timeline.is-filtering .panel.highlight { opacity: 1; filter: none; }
+  body[data-template="comic"] .panel.kb-focused {
+    outline: 4px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .panel-art {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+  }
+  .panel-art svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .panel-caption {
+    position: relative;
+    z-index: 2;
+    background: #fff;
+    border: 2.5px solid #0a0a0a;
+    margin: 10px 14px 0;
+    padding: 8px 12px 9px;
+    font-family: 'Patrick Hand', 'Comic Neue', cursive;
+    font-size: 17px;
+    line-height: 1.18;
+    color: #0a0a0a;
+    text-align: center;
+    align-self: stretch;
+    box-shadow: 3px 3px 0 #0a0a0a;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  .panel-speaker {
+    position: absolute;
+    bottom: 6px;
+    right: 8px;
+    z-index: 3;
+    font-family: 'Caveat', cursive;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: -1px -1px 0 #0a0a0a, 1px -1px 0 #0a0a0a, -1px 1px 0 #0a0a0a, 1px 1px 0 #0a0a0a;
+    letter-spacing: .5px;
+    pointer-events: none;
+  }
+  .panel.left-speaker .panel-speaker { right: auto; left: 8px; }
+
+  .panel-number {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    z-index: 3;
+    font-family: 'Patrick Hand', cursive;
+    font-size: 11px;
+    background: #fff;
+    border: 1.5px solid #0a0a0a;
+    padding: 0 5px;
+    color: #0a0a0a;
+    line-height: 1.4;
+  }
+
+  .panel-share {
+    position: absolute;
+    bottom: 6px;
+    left: 8px;
+    z-index: 4;
+    background: #fff;
+    border: 1.5px solid #0a0a0a;
+    color: #0a0a0a;
+    font-family: 'Patrick Hand', cursive;
+    font-size: 11px;
+    padding: 1px 7px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity .15s;
+  }
+  .panel:hover .panel-share { opacity: 1; }
+  .panel-share:hover { background: #ffdf3a; }
+  .panel.left-speaker .panel-share { left: auto; right: 8px; }
+
+  .comic-page-foot {
+    text-align: center;
+    margin-top: 12px;
+    padding-top: 8px;
+    font-family: 'Patrick Hand', cursive;
+    font-size: 12px;
+    color: #555;
+    letter-spacing: .1em;
+  }
+
+  /* Panel attachments override */
+  body[data-template="comic"] .panel .attach {
+    margin: 0;
+    border: 0;
+    border-top: 2.5px solid #0a0a0a;
+  }
+
+  @media (max-width: 720px) {
+    .panel-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .panel { min-height: 200px; }
+    .panel.span-3, .panel.span-2, .panel.span-4, .panel.span-6 { grid-column: span 2 !important; }
+    .panel-caption { font-size: 15px; margin: 8px 10px 0; padding: 6px 10px; }
+    .comic-page { padding: 16px 14px 10px; }
+    .comic-page-title { font-size: 22px; }
+  }
+
   /* scrollbar */
   .scroll::-webkit-scrollbar,
   .story-list::-webkit-scrollbar { width: 10px; }
@@ -949,6 +1163,16 @@
           <i data-lucide="download" width="14" height="14"></i>
           <span class="btn-label">Install</span>
         </button>
+        <div class="template-switch" role="tablist" aria-label="Template">
+          <button class="tb-btn template-btn active" data-template="terminal" aria-pressed="true">
+            <i data-lucide="terminal" width="14" height="14"></i>
+            <span class="btn-label">Terminal</span>
+          </button>
+          <button class="tb-btn template-btn" data-template="comic" aria-pressed="false">
+            <i data-lucide="book-open" width="14" height="14"></i>
+            <span class="btn-label">Comic</span>
+          </button>
+        </div>
         <button class="tb-btn" id="kb-help-btn" aria-label="Keyboard shortcuts">
           <i data-lucide="command" width="14" height="14"></i>
           <span class="btn-label">Shortcuts</span>
@@ -1026,6 +1250,49 @@
 </div>
 
 <script>
+  /* ────────────── Data source ────────────── */
+  const DATA_URL = 'https://static-conf.vercel.app/go/this-and-that';
+
+  /* ────────────── Mock data (fallback) ────────────── */
+  const SAMPLE_STORIES = [
+    {
+      title: "Bug Hunt: The Missing Comma",
+      messages: [
+        { username: "alex", sender: "left",  text: "Production is down. The chart panel just shows a blank canvas.", timestamp: "2026-03-04 09:12" },
+        { username: "morgan", sender: "right", text: "On it. Can you ship me the error from the console?", timestamp: "2026-03-04 09:13" },
+        { username: "alex", sender: "left",  text: "Uncaught SyntaxError: Unexpected token ')'. Line 247. Help.", timestamp: "2026-03-04 09:14" },
+        { username: "morgan", sender: "right", text: "Classic. Missing comma in the series array. Pushing a fix now.", timestamp: "2026-03-04 09:21" },
+        { username: "alex", sender: "left",  text: "You absolute legend. Owe you a coffee.", timestamp: "2026-03-04 09:24" },
+        { username: "robin", sender: "left",  text: "Approved the hotfix. Rolling to prod in 2.", timestamp: "2026-03-05 10:02" },
+        { username: "morgan", sender: "right", text: "Postmortem doc is up. Three lessons learned, none of them comfortable.", timestamp: "2026-03-05 14:30" },
+        { username: "alex", sender: "left",  text: "Reading now. Adding a unit test that would have caught this.", timestamp: "2026-03-05 14:55" }
+      ]
+    },
+    {
+      title: "Late Night Refactor",
+      messages: [
+        { username: "kai", sender: "left",  text: "I'm staring at this file. It's 2,000 lines. I think we have to break it up.", timestamp: "2026-02-18 22:40" },
+        { username: "lin", sender: "right", text: "Don't refactor at 11pm. That's how legends are born and bugs are too.", timestamp: "2026-02-18 22:42" },
+        { username: "kai", sender: "left",  text: "I'm doing it anyway. Splitting hooks, components, and helpers.", timestamp: "2026-02-18 22:44" },
+        { username: "lin", sender: "right", text: "ok but commit early commit often. I want to see your branch.", timestamp: "2026-02-18 22:45" },
+        { username: "kai", sender: "left",  text: "First commit pushed. Six new files. 400 lines lighter already.", timestamp: "2026-02-19 00:18" },
+        { username: "lin", sender: "right", text: "looks good actually. nice naming on the hook split.", timestamp: "2026-02-19 09:01" },
+        { username: "kai", sender: "left",  text: "Thanks. Going to sleep now. Don't merge without me.", timestamp: "2026-02-19 09:03" }
+      ]
+    },
+    {
+      title: "Design Review · v3 dashboard",
+      messages: [
+        { username: "sam", sender: "left",  text: "Mocks are in. I went with a single-column layout for the analytics view.", timestamp: "2026-01-22 11:00" },
+        { username: "drew", sender: "right", text: "I like the rhythm. The density feels right. One nit: the chart titles are tiny.", timestamp: "2026-01-22 11:14" },
+        { username: "sam", sender: "left",  text: "Bumping titles to 16px and adding a subtle separator. Repushing.", timestamp: "2026-01-22 11:28" },
+        { username: "drew", sender: "right", text: "Much better. Ship it. Loop in eng on the empty state animation.", timestamp: "2026-01-22 11:40" },
+        { username: "pat", sender: "left",  text: "Eng here. We can do a 200ms CSS fade. Anything heavier needs a sprint.", timestamp: "2026-01-23 09:30" },
+        { username: "sam", sender: "left",  text: "Fade is fine. Let's not overengineer the empty state.", timestamp: "2026-01-23 09:35" }
+      ]
+    }
+  ];
+
   /* ────────────── State ────────────── */
   let stories = [];
   let currentMessages = [];
@@ -1057,6 +1324,243 @@
   const shareModal = $('share-modal');
   const storySearch = $('story-search');
 
+  /* ────────────── Template state ────────────── */
+  const TEMPLATE_KEY = 'comic_timeline_template';
+  let currentTemplate = localStorage.getItem(TEMPLATE_KEY) || 'terminal';
+  document.body.setAttribute('data-template', currentTemplate);
+
+  function setTemplate(name){
+    if (name === currentTemplate) return;
+    currentTemplate = name;
+    document.body.setAttribute('data-template', name);
+    localStorage.setItem(TEMPLATE_KEY, name);
+    document.querySelectorAll('.template-btn').forEach(b => {
+      const on = b.dataset.template === name;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    if (currentStory >= 0) loadStory(currentStory);
+  }
+
+  document.querySelectorAll('.template-btn').forEach(b => {
+    if (b.dataset.template === currentTemplate) b.classList.add('active');
+    b.addEventListener('click', () => setTemplate(b.dataset.template));
+  });
+
+  /* ────────────── Comic panel art library ────────────── */
+  const INK = '#0a0a0a';
+
+  function artCrowd(){
+    let dots = '';
+    for (let r = 0; r < 6; r++){
+      for (let c = 0; c < 11; c++){
+        const x = 20 + c*36 + (r%2)*18;
+        const y = 130 + r*26;
+        dots += `<circle cx="${x}" cy="${y}" r="10" fill="#fff" stroke="${INK}" stroke-width="2"/>`;
+        dots += `<path d="M${x-5} ${y-1} L${x+5} ${y-1} M${x} ${y-6} L${x} ${y+4}" stroke="${INK}" stroke-width="1.5" fill="none"/>`;
+      }
+    }
+    return `<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="300" fill="#fff"/>
+      <path d="M0 300 L0 115 Q70 95 140 110 Q220 130 300 105 Q360 90 400 110 L400 300 Z" fill="${INK}"/>
+      ${dots}
+      <path d="M55 50 L55 175" stroke="${INK}" stroke-width="4"/>
+      <path d="M55 50 L105 55 L100 75 L55 70 Z" fill="${INK}"/>
+      <circle cx="80" cy="62" r="6" fill="#fff"/>
+    </svg>`;
+  }
+
+  function artMountains(){
+    return `<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="300" fill="#fff"/>
+      <circle cx="310" cy="75" r="30" fill="${INK}"/>
+      <circle cx="302" cy="70" r="22" fill="#fff"/>
+      <path d="M0 220 L40 170 Q60 158 80 175 L130 130 Q150 118 175 140 L220 100 Q240 90 265 115 L320 150 Q345 165 370 145 L400 165 L400 300 L0 300 Z" fill="${INK}"/>
+      <g transform="translate(45,135)" fill="${INK}">
+        <path d="M0 0 L28 -15 L56 0 L46 7 L10 7 Z"/>
+        <rect x="10" y="7" width="36" height="18"/>
+        <path d="M-2 25 L58 25 L48 35 L8 35 Z"/>
+        <rect x="14" y="35" width="28" height="22"/>
+        <path d="M5 57 L51 57 L43 67 L13 67 Z"/>
+        <rect x="20" y="67" width="16" height="26"/>
+      </g>
+      <path d="M0 250 Q40 245 80 252 T160 248 T240 254 T320 248 T400 252" stroke="#fff" stroke-width="2.5" fill="none"/>
+      <path d="M0 272 Q40 268 80 274 T160 270 T240 276 T320 270 T400 274" stroke="#fff" stroke-width="2.5" fill="none"/>
+    </svg>`;
+  }
+
+  function artPlanes(){
+    let planes = '';
+    [[80,60,1],[160,90,0.85],[240,55,1.2],[315,95,0.9],[120,130,0.75]].forEach(([x,y,s])=>{
+      planes += `<g transform="translate(${x},${y}) scale(${s})"><path d="M-22 0 L0 -4 L22 0 L0 4 Z M-2 -14 L2 -14 L2 14 L-2 14 Z" fill="${INK}"/></g>`;
+    });
+    return `<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="300" fill="#fff"/>
+      <path d="M0 220 Q20 200 50 210 Q70 215 90 200 Q120 195 140 215 Q170 220 195 200 Q220 215 245 205 Q280 200 305 220 Q340 215 370 205 Q390 215 400 220 L400 300 L0 300 Z" fill="${INK}"/>
+      ${planes}
+      <g fill="${INK}">
+        <rect x="50" y="240" width="24" height="40"/>
+        <rect x="82" y="230" width="30" height="50"/>
+        <rect x="120" y="245" width="22" height="35"/>
+        <rect x="260" y="235" width="34" height="45"/>
+        <rect x="302" y="248" width="24" height="32"/>
+        <rect x="332" y="240" width="28" height="40"/>
+      </g>
+      <g fill="#fff">
+        <rect x="57" y="248" width="4" height="5"/><rect x="63" y="248" width="4" height="5"/>
+        <rect x="88" y="240" width="4" height="5"/><rect x="96" y="240" width="4" height="5"/><rect x="104" y="240" width="4" height="5"/>
+        <rect x="268" y="244" width="4" height="5"/><rect x="276" y="244" width="4" height="5"/>
+        <rect x="340" y="250" width="4" height="5"/><rect x="348" y="250" width="4" height="5"/>
+      </g>
+    </svg>`;
+  }
+
+  function artFigure(){
+    return `<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="300" fill="#fff"/>
+      <path d="M0 260 Q200 245 400 260 L400 300 L0 300 Z" fill="${INK}"/>
+      <g fill="${INK}">
+        <ellipse cx="200" cy="95" rx="34" ry="38"/>
+        <path d="M165 90 Q200 60 235 90 L240 80 Q200 45 160 80 Z"/>
+        <path d="M170 130 Q200 140 230 130 L255 220 Q260 250 240 260 L160 260 Q140 250 145 220 Z"/>
+        <path d="M155 175 L120 220 L130 230 L165 195 Z"/>
+        <path d="M245 175 L280 220 L270 230 L235 195 Z"/>
+        <circle cx="112" cy="218" r="18"/>
+      </g>
+      <g fill="#fff"><circle cx="189" cy="92" r="3"/><circle cx="211" cy="92" r="3"/></g>
+      <path d="M195 110 Q200 115 205 110" stroke="#fff" stroke-width="2" fill="none"/>
+    </svg>`;
+  }
+
+  function artCity(){
+    return `<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="300" fill="#fff"/>
+      <circle cx="330" cy="55" r="24" fill="${INK}"/>
+      <circle cx="321" cy="50" r="18" fill="#fff"/>
+      <g fill="${INK}">
+        <rect x="30" y="160" width="50" height="140"/>
+        <rect x="85" y="120" width="40" height="180"/>
+        <path d="M130 100 L150 80 L170 100 L170 300 L130 300 Z"/>
+        <rect x="175" y="140" width="55" height="160"/>
+        <rect x="235" y="170" width="45" height="130"/>
+        <rect x="285" y="110" width="55" height="190"/>
+        <rect x="345" y="150" width="55" height="150"/>
+      </g>
+      <g fill="#fff">
+        <rect x="40" y="175" width="6" height="8"/><rect x="54" y="175" width="6" height="8"/><rect x="68" y="175" width="6" height="8"/>
+        <rect x="40" y="195" width="6" height="8"/><rect x="68" y="195" width="6" height="8"/>
+        <rect x="40" y="215" width="6" height="8"/><rect x="54" y="215" width="6" height="8"/>
+        <rect x="94" y="140" width="5" height="7"/><rect x="105" y="140" width="5" height="7"/><rect x="116" y="140" width="5" height="7"/>
+        <rect x="94" y="160" width="5" height="7"/><rect x="116" y="160" width="5" height="7"/>
+        <rect x="94" y="180" width="5" height="7"/><rect x="105" y="180" width="5" height="7"/>
+        <rect x="185" y="155" width="7" height="9"/><rect x="200" y="155" width="7" height="9"/><rect x="215" y="155" width="7" height="9"/>
+        <rect x="185" y="180" width="7" height="9"/><rect x="215" y="180" width="7" height="9"/>
+        <rect x="185" y="205" width="7" height="9"/><rect x="200" y="205" width="7" height="9"/>
+        <rect x="245" y="185" width="5" height="7"/><rect x="258" y="185" width="5" height="7"/><rect x="269" y="185" width="5" height="7"/>
+        <rect x="245" y="205" width="5" height="7"/><rect x="269" y="205" width="5" height="7"/>
+        <rect x="295" y="125" width="7" height="9"/><rect x="310" y="125" width="7" height="9"/><rect x="325" y="125" width="7" height="9"/>
+        <rect x="295" y="150" width="7" height="9"/><rect x="325" y="150" width="7" height="9"/>
+        <rect x="295" y="175" width="7" height="9"/><rect x="310" y="175" width="7" height="9"/>
+        <rect x="355" y="165" width="6" height="8"/><rect x="368" y="165" width="6" height="8"/><rect x="380" y="165" width="6" height="8"/>
+        <rect x="355" y="185" width="6" height="8"/><rect x="380" y="185" width="6" height="8"/>
+      </g>
+      <g fill="${INK}">
+        <circle cx="40" cy="40" r="1.5"/><circle cx="90" cy="30" r="1.5"/><circle cx="180" cy="45" r="1.5"/><circle cx="260" cy="30" r="1.5"/><circle cx="380" cy="40" r="1.5"/>
+      </g>
+    </svg>`;
+  }
+
+  function artMap(){
+    return `<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="300" fill="#fff"/>
+      <g stroke="${INK}" stroke-width="2" fill="none">
+        <path d="M30 60 Q90 50 130 80 T220 70 T320 90 L370 110"/>
+        <path d="M40 110 Q100 100 140 130 T230 120 T330 140"/>
+        <path d="M30 160 Q90 150 130 175 T220 160 T320 180 L370 195"/>
+        <path d="M30 210 Q100 205 150 225 T240 215 T350 230"/>
+        <path d="M60 260 Q140 250 200 270 T340 260"/>
+      </g>
+      <g stroke="${INK}" stroke-width="2" fill="none">
+        <path d="M40 35 Q70 25 100 40 T160 35"/>
+        <path d="M210 30 Q240 20 270 35 T330 30"/>
+      </g>
+      <rect x="100" y="75" width="60" height="30" fill="#fff" stroke="${INK}" stroke-width="2"/>
+      <rect x="230" y="195" width="75" height="30" fill="#fff" stroke="${INK}" stroke-width="2"/>
+      <text x="130" y="96" font-family="'Patrick Hand', cursive" font-size="15" text-anchor="middle" fill="${INK}">point a</text>
+      <text x="267" y="216" font-family="'Patrick Hand', cursive" font-size="15" text-anchor="middle" fill="${INK}">point b</text>
+      <path d="M155 120 Q180 160 220 195" stroke="${INK}" stroke-width="3" fill="none" stroke-dasharray="6 5"/>
+      <path d="M215 190 L228 198 L218 205 Z" fill="${INK}"/>
+      <g fill="${INK}"><circle cx="130" cy="90" r="4"/><circle cx="267" cy="210" r="4"/></g>
+    </svg>`;
+  }
+
+  function artForest(){
+    let trees = '';
+    [[40,210,1],[95,205,1.3],[155,215,0.9],[220,200,1.4],[290,212,1.05],[345,205,1.2],[15,240,0.7],[80,250,0.65],[200,245,0.7],[300,255,0.75],[370,250,0.65]].forEach(([x,y,s])=>{
+      trees += `<g transform="translate(${x},${y}) scale(${s})" fill="${INK}"><path d="M0 0 L-22 30 L-8 30 L-15 50 L-3 50 L-10 70 L10 70 L3 50 L15 50 L8 30 L22 30 Z"/><rect x="-3" y="68" width="6" height="14"/></g>`;
+    });
+    return `<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="300" fill="#fff"/>
+      <path d="M0 290 Q200 270 400 290 L400 300 L0 300 Z" fill="${INK}"/>
+      <g stroke="${INK}" stroke-width="1.5" fill="none" opacity="0.4"><path d="M120 285 Q200 275 280 285"/><path d="M100 295 Q200 282 300 295"/></g>
+      ${trees}
+    </svg>`;
+  }
+
+  function artBoat(){
+    return `<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <rect width="400" height="300" fill="#fff"/>
+      <path d="M0 130 L80 80 L130 110 L200 60 L260 100 L330 70 L400 110 L400 165 L0 165 Z" fill="${INK}"/>
+      <g transform="translate(180,170)" fill="${INK}">
+        <path d="M-50 30 L50 30 L40 50 L-40 50 Z"/>
+        <rect x="-3" y="-30" width="4" height="60"/>
+        <path d="M2 -25 L40 5 L2 5 Z"/>
+        <path d="M-2 -20 L-32 5 L-2 5 Z"/>
+      </g>
+      <g stroke="${INK}" stroke-width="2" fill="none">
+        <path d="M0 230 Q30 220 60 232 T120 228 T180 234 T240 226 T300 232 T360 226 T400 230"/>
+        <path d="M0 250 Q40 242 80 252 T160 248 T240 254 T320 246 T400 250"/>
+        <path d="M0 275 Q40 268 80 278 T160 272 T240 280 T320 270 T400 276"/>
+      </g>
+      <circle cx="55" cy="45" r="14" fill="#fff" stroke="${INK}" stroke-width="2"/>
+    </svg>`;
+  }
+
+  const ART_LIB = [artCrowd, artMountains, artPlanes, artFigure, artCity, artMap, artForest, artBoat];
+
+  function pickArt(msg, idx){
+    const seed = hashName((msg.username||'') + idx + (msg.text||'').length);
+    return ART_LIB[seed % ART_LIB.length]();
+  }
+
+  /* ────────────── Comic page layout helpers ────────────── */
+  const PANEL_PATTERNS = [[3,3],[2,2,2],[4,2],[3,3],[2,2,2],[2,4],[6]];
+
+  function spansFor(n){
+    const out = [];
+    let p = 0;
+    while (out.length < n){
+      const pat = PANEL_PATTERNS[p % PANEL_PATTERNS.length];
+      for (const s of pat){
+        if (out.length >= n) break;
+        out.push(s);
+      }
+      p++;
+    }
+    const rows = [[]]; let sum = 0;
+    for (const s of out){
+      if (sum + s > 6){ rows.push([]); sum = 0; }
+      rows[rows.length-1].push(s);
+      sum += s;
+      if (sum === 6){ rows.push([]); sum = 0; }
+    }
+    if (rows[rows.length-1].length === 0) rows.pop();
+    const last = rows[rows.length-1];
+    const lastSum = last.reduce((a,b)=>a+b,0);
+    if (lastSum < 6 && last.length) last[last.length-1] += (6 - lastSum);
+    return rows.flat();
+  }
+
   /* ────────────── Character colors ────────────── */
   const CHAR_COLORS = [
     { bg: '#fff1ea', fg: '#9c3a1a', solid: 'var(--term-orange)' },
@@ -1079,6 +1583,28 @@
 
   /* ────────────── Helpers ────────────── */
   function safeURL(url){ return typeof url==='string' && /^https?:\/\//i.test(url.trim()) ? url.trim() : null; }
+
+  /* Parse a timestamp into { date, time } labels. Handles:
+       "2026-03-04 09:12"           -> { date: "2026-03-04", time: "09:12" }
+       "11:27 AM, Mar 12, 2026"     -> { date: "Mar 12, 2026", time: "11:27 AM" }
+       "20:18 PM, Mar 01 2026"      -> { date: "Mar 01 2026", time: "20:18 PM" }
+       anything else                -> first chunk as date */
+  function parseTimestamp(raw){
+    const s = (raw || '').trim();
+    if (!s) return { date: 'Start', time: '' };
+    // ISO-ish: 2026-03-04 09:12 or 2026-03-04T09:12
+    const iso = s.match(/^(\d{4}-\d{2}-\d{2})[\sT]+(\d{1,2}:\d{2})/);
+    if (iso) return { date: iso[1], time: iso[2] };
+    // "HH:MM[ AM/PM][, ]Mon DD[,] YYYY"
+    const am = s.match(/^(\d{1,2}:\d{2}\s*(?:AM|PM|am|pm)?)\s*,?\s*([A-Za-z]{3,9}\s+\d{1,2}\s*,?\s*\d{4})/);
+    if (am) return { date: am[2].replace(/\s+/g,' ').trim(), time: am[1].trim() };
+    // Fallback: split on first comma if present
+    if (s.includes(',')){
+      const parts = s.split(',').map(p=>p.trim());
+      if (parts.length >= 2) return { date: parts.slice(1).join(', '), time: parts[0] };
+    }
+    return { date: s.split(/\s+/)[0] || 'Start', time: '' };
+  }
   function scrollOffsetOf(el){
     return el.getBoundingClientRect().top - scrollEl.getBoundingClientRect().top + scrollEl.scrollTop;
   }
@@ -1230,7 +1756,7 @@
       activeFilter = username;
       timeline.classList.add('is-filtering');
       legendEl.querySelectorAll('.pill').forEach(p=>p.classList.toggle('filtering', p.dataset.user===username));
-      timeline.querySelectorAll('.message').forEach(m=>m.classList.toggle('highlight', m.dataset.author===username));
+      timeline.querySelectorAll('.message, .panel').forEach(el=>el.classList.toggle('highlight', el.dataset.author===username));
     }
   }
 
@@ -1310,7 +1836,10 @@
   kbOverlay.addEventListener('click', e=>{ if (e.target===kbOverlay) closeKb(); });
   shareModal.addEventListener('click', e=>{ if (e.target===shareModal) shareModal.classList.remove('visible'); });
 
-  function getMessageEls(){ return Array.from(timeline.querySelectorAll('.message')); }
+  function getMessageEls(){
+    const sel = currentTemplate === 'comic' ? '.panel' : '.message';
+    return Array.from(timeline.querySelectorAll(sel));
+  }
   function setKbFocus(i){
     const msgs = getMessageEls(); if (!msgs.length) return;
     i = Math.max(0, Math.min(msgs.length-1, i));
@@ -1345,63 +1874,21 @@
     }
   });
 
-  /* ────────────── Load story ────────────── */
-  function loadStory(index){
-    const story = stories[index];
-    currentMessages = story.messages;
-    currentStory = index;
-    kbFocusIndex = -1;
-    activeFilter = null;
-
-    timeline.classList.remove('is-filtering');
-    timeline.innerHTML = '';
-    $('empty-state').style.display = 'none';
-    $('story-header').style.display = 'block';
-    timeline.classList.add('active');
-    crumbPath.innerHTML = `timeline · <b></b>`;
-    crumbPath.querySelector('b').textContent = story.title;
-
-    if (window.innerWidth <= 900) closeSidebar();
-
-    renderStoryList(storySearch.value);
-
-    // Legend
-    legendEl.innerHTML = '';
-    const lbl = document.createElement('span'); lbl.className='legend-label'; lbl.textContent='who:';
-    legendEl.appendChild(lbl);
-
-    const seen = new Map();
-    story.messages.forEach(m => { if (m.username && !seen.has(m.username)) seen.set(m.username, true); });
-    seen.forEach((_, name) => {
-      const c = getColor(name);
-      const pill = document.createElement('div');
-      pill.className = 'pill';
-      pill.dataset.user = name;
-      pill.innerHTML = `<div class="dot"></div><span></span>`;
-      pill.querySelector('.dot').style.background = c.solid;
-      pill.querySelector('.dot').textContent = initials(name);
-      pill.querySelector('span').textContent = name;
-      pill.addEventListener('click', () => toggleFilter(name));
-      legendEl.appendChild(pill);
-    });
-
-    // Chapters
+  /* ────────────── Render: terminal ────────────── */
+  function renderTerminal(story){
     chapters = [];
     const seenDates = new Map();
     story.messages.forEach((m,i)=>{
-      const raw = (m.timestamp||'').trim();
-      const label = raw.split(/[\s,T]/)[0] || 'Start';
+      const { date: label } = parseTimestamp(m.timestamp);
       if (!seenDates.has(label)){ seenDates.set(label, i); chapters.push({label, startIndex:i, msgEl:null}); }
     });
 
-    // Build messages with date dividers
     const frag = document.createDocumentFragment();
     let lastDate = null;
     story.messages.forEach((m,i)=>{
       const side = (m.sender==='right'||m.sender==='me') ? 'right' : 'left';
       const color = getColor(m.username);
-      const dateLabel = ((m.timestamp||'').trim().split(/[\s,T]/)[0]) || 'Start';
-      const timeOnly = ((m.timestamp||'').trim().split(/[\s,T]/)[1]) || '';
+      const { date: dateLabel, time: timeOnly } = parseTimestamp(m.timestamp);
 
       if (dateLabel !== lastDate){
         const div = document.createElement('div');
@@ -1451,12 +1938,138 @@
 
       frag.appendChild(msg);
 
-      // Attach chapter msgEl reference
       const ch = chapters.find(c => c.startIndex === i);
       if (ch) ch.msgEl = msg;
     });
 
     timeline.appendChild(frag);
+  }
+
+  /* ────────────── Render: comic ────────────── */
+  function renderComic(story){
+    const groups = [];
+    let lastDate = null;
+    story.messages.forEach((m, i) => {
+      const { date } = parseTimestamp(m.timestamp);
+      if (date !== lastDate){ groups.push({ date, items: [] }); lastDate = date; }
+      groups[groups.length-1].items.push({ m, i });
+    });
+
+    chapters = [];
+    const frag = document.createDocumentFragment();
+
+    groups.forEach((g, gi) => {
+      const page = document.createElement('div');
+      page.className = 'comic-page';
+
+      const head = document.createElement('div');
+      head.className = 'comic-page-head';
+      head.innerHTML = `<div class="comic-page-title"></div><div class="comic-page-stamp"></div>`;
+      head.querySelector('.comic-page-title').textContent = story.title;
+      head.querySelector('.comic-page-stamp').textContent = g.date;
+      page.appendChild(head);
+
+      const grid = document.createElement('div');
+      grid.className = 'panel-grid';
+      const spans = spansFor(g.items.length);
+
+      g.items.forEach((it, k) => {
+        const { m, i } = it;
+        const side = (m.sender==='right' || m.sender==='me') ? 'right' : 'left';
+        const span = spans[k] || 2;
+
+        const panel = document.createElement('div');
+        panel.className = `panel span-${span}` + (side === 'right' ? ' left-speaker' : '');
+        panel.style.gridColumn = `span ${span}`;
+        panel.dataset.author = m.username || 'unknown';
+        panel.dataset.msgIndex = String(i);
+        panel.style.minHeight = (span >= 6 ? 280 : (span >= 4 ? 250 : 230)) + 'px';
+
+        panel.innerHTML = `
+          <div class="panel-art">${pickArt(m, i)}</div>
+          <div class="panel-number">#${i+1}</div>
+          <div class="panel-caption"></div>
+          <div class="panel-speaker"></div>
+          <button class="panel-share" title="share">share</button>
+        `;
+        panel.querySelector('.panel-caption').textContent = m.text || '';
+        panel.querySelector('.panel-speaker').textContent = '— ' + (m.username || 'unknown');
+
+        if (m.attachment){
+          const html = attachmentHTML(m.attachment);
+          if (html){
+            const wrap = document.createElement('div');
+            wrap.style.cssText = 'position:relative;z-index:2;margin:10px 0 0;';
+            wrap.innerHTML = html;
+            panel.appendChild(wrap);
+          }
+        }
+
+        const btn = panel.querySelector('.panel-share');
+        btn.addEventListener('click', e => { e.stopPropagation(); handleShare(btn, i); });
+
+        if (k === 0){
+          chapters.push({ label: g.date, startIndex: i, msgEl: panel });
+        }
+
+        grid.appendChild(panel);
+      });
+
+      page.appendChild(grid);
+
+      const foot = document.createElement('div');
+      foot.className = 'comic-page-foot';
+      foot.textContent = `— ${String(gi+1).padStart(2,'0')} —`;
+      page.appendChild(foot);
+
+      frag.appendChild(page);
+    });
+
+    timeline.appendChild(frag);
+  }
+
+  /* ────────────── Load story ────────────── */
+  function loadStory(index){
+    const story = stories[index];
+    currentMessages = story.messages;
+    currentStory = index;
+    kbFocusIndex = -1;
+    activeFilter = null;
+
+    timeline.classList.remove('is-filtering');
+    timeline.innerHTML = '';
+    $('empty-state').style.display = 'none';
+    $('story-header').style.display = 'block';
+    timeline.classList.add('active');
+    crumbPath.innerHTML = `timeline · <b></b>`;
+    crumbPath.querySelector('b').textContent = story.title;
+
+    if (window.innerWidth <= 900) closeSidebar();
+    renderStoryList(storySearch.value);
+
+    // Legend (shared)
+    legendEl.innerHTML = '';
+    const lbl = document.createElement('span'); lbl.className='legend-label'; lbl.textContent='who:';
+    legendEl.appendChild(lbl);
+    const seen = new Map();
+    story.messages.forEach(m => { if (m.username && !seen.has(m.username)) seen.set(m.username, true); });
+    seen.forEach((_, name) => {
+      const c = getColor(name);
+      const pill = document.createElement('div');
+      pill.className = 'pill';
+      pill.dataset.user = name;
+      pill.innerHTML = `<div class="dot"></div><span></span>`;
+      pill.querySelector('.dot').style.background = c.solid;
+      pill.querySelector('.dot').textContent = initials(name);
+      pill.querySelector('span').textContent = name;
+      pill.addEventListener('click', () => toggleFilter(name));
+      legendEl.appendChild(pill);
+    });
+
+    // Dispatch render
+    if (currentTemplate === 'comic') renderComic(story);
+    else renderTerminal(story);
+
     lucide.createIcons();
     buildSlider();
     requestAnimationFrame(()=>{
@@ -1481,19 +2094,73 @@
   });
 
   /* ────────────── Init ────────────── */
-  (async function init() {
+  function setEmptyState(html){
+    const e = document.getElementById('empty-state');
+    e.innerHTML = html;
+    e.style.display = 'block';
+  }
+
+  function normalizeStories(raw){
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .map(s => {
+        if (!s || typeof s !== 'object') return null;
+        const title = (s.title || s.name || 'Untitled').toString().trim() || 'Untitled';
+        const messages = Array.isArray(s.messages) ? s.messages.filter(m => m && typeof m === 'object') : [];
+        // strip empty-url attachments so renderer doesn't show broken images
+        messages.forEach(m => {
+          if (m.attachment && (!m.attachment.url || !/^https?:\/\//i.test(String(m.attachment.url).trim()))) {
+            delete m.attachment;
+          }
+        });
+        return { title, messages };
+      })
+      .filter(s => s && s.messages.length > 0);
+  }
+
+  async function loadStories(){
+    setEmptyState(`
+      <div class="glyph">~</div>
+      <h1>Loading stories…</h1>
+      <p>Fetching the latest timeline.</p>
+      <p class="hint">${DATA_URL.replace(/^https?:\/\//,'')}</p>
+    `);
     try {
-      const res = await fetch('https://static-conf.vercel.app/go/this-and-that');
-      const raw = await res.json();
-      stories = raw.map(s => ({ title: s.name || s.title || 'Untitled', messages: s.messages || [] }));
-    } catch(e) {
-      console.warn('Failed to load remote data.', e);
-      stories = [];
+      const res = await fetch(DATA_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      const normalized = normalizeStories(data);
+      if (!normalized.length) throw new Error('No stories in response');
+      stories = normalized;
+      renderStoryList();
+      setEmptyState(`
+        <div class="glyph">!?</div>
+        <h1>Pick a story to read</h1>
+        <p>${stories.length} thread${stories.length===1?'':'s'} loaded. Open one from the sidebar.</p>
+        <p class="hint">Press <kbd>?</kbd> for shortcuts · <kbd>/</kbd> to search</p>
+      `);
+      if (window.innerWidth > 900) loadStory(0);
+    } catch (err) {
+      console.error('Failed to load stories', err);
+      stories = SAMPLE_STORIES;
+      renderStoryList();
+      setEmptyState(`
+        <div class="glyph" style="background:var(--ink);">×</div>
+        <h1>Could not load timeline</h1>
+        <p>${(err && err.message) || 'Network error'}</p>
+        <p>Showing sample stories instead.</p>
+        <p class="hint"><button class="tb-btn primary" id="retry-load" style="margin-top:8px;height:auto;padding:8px 14px;">Retry</button></p>
+      `);
+      const r = document.getElementById('retry-load');
+      if (r) r.addEventListener('click', loadStories);
+      if (window.innerWidth > 900) loadStory(0);
     }
-    renderStoryList();
     lucide.createIcons();
-    if (window.innerWidth > 900 && stories.length > 0) loadStory(0);
-  })();
+  }
+
+  renderStoryList();
+  lucide.createIcons();
+  loadStories();
 </script>
 </body>
 </html>
